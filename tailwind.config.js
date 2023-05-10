@@ -6,13 +6,30 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    fontFamily: {
+      sans: ["Red Hat Display", "Inter", "sans-serif"],
+    },
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      keyframes: {
+        fade: {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
+        animation: {
+          "fade-in-s": "fade 4.5s ease-in-out",
+        },
+      },
+
+      animation: {
+        spinSlow: "spin 8s linear infinite",
+        spinDJ: "spin 4s ease infinite",
       },
     },
+    variants: {},
+    plugins: [],
   },
-  plugins: [],
-}
+};
