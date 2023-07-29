@@ -71,7 +71,7 @@ export default function Home() {
           </h2>
           <a
             className="text-xl md:text-2xl py-2 px-6 md:py-4 md:px-10 bg-[#D42C4B] rounded-xl transition ease-in-out hover:scale-110"
-            href="/Rachelle_DeMan_feb_resume.pdf"
+            href="/RachelleDeManResume.pdf"
           >
             Resume
           </a>
