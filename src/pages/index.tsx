@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import SocialLink from "../components/SocialLink";
 import CurrentlyPlaying from "../components/LastFM";
 import CopyrightBeta from "../components/CopyrightBeta";
+import Card from "../components/Card2";
+import Card3 from "../components/Card3";
 
 //const inter = Inter({ subsets: ["latin"] });
 
@@ -107,3 +109,20 @@ export default function Home() {
     </div>
   );
 }
+
+/**
+<div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
+          <Card
+            link="mailto:rachelledeman@icloud.com"
+            title="Email"
+            description="example"
+            image="/mailLogo.svg"
+          />
+          <Card3
+            link="mailto:rachelledeman@icloud.com"
+            title="Email"
+            description="example"
+            image="/mailLogo.svg"
+          />
+        </div>
+ */
