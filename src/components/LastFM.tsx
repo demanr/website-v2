@@ -33,7 +33,7 @@ const CurrentlyPlaying = () => {
       id="player"
       className="transition duration-500 overflow-hidden flex h-[7rem] wp-full lg:w-[20rem] gap-4 lg:pr-8 bg-none lg:bg-[#DE2D4E] p-4 lg:rounded-full opacity-1"
     >
-      <div className="h-full overflow-hidden border-2 rounded-full aspect-square animate-spinDJ">
+      <div className="h-full overflow-hidden border-2 rounded-full aspect-square animate-spinConst">
         <img
           src={lastFM.song.art ? lastFM.song.art : "record.webp"}
           className="w-full h-full aspect-square"
