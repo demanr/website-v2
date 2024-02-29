@@ -6,7 +6,7 @@ const CopyrightBeta = () => {
 
   return (
     <footer className="bottom-0 w-full py-6 text-xs text-center sm:absolute">
-      © Rachelle DeMan {year} - All Rights Reserved.
+      © Rachelle De Man {year} - All Rights Reserved.
     </footer>
   );
 };

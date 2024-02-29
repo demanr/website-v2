@@ -5,6 +5,7 @@ import CurrentlyPlaying from "../components/LastFM";
 import CopyrightBeta from "../components/CopyrightBeta";
 import Card from "../components/Card2";
 import Card3 from "../components/Card3";
+import Card4 from "../components/Card4";
 
 //const inter = Inter({ subsets: ["latin"] });
 
@@ -65,7 +66,9 @@ export default function Home() {
       <div className="w-full h-full text-white align-center">
         <main className="flex flex-col items-center justify-center w-full p-16 font-bold text-center md:p-24">
           <h1 className="pt-12 text-5xl font-bold md:text-7xl">Rachelle</h1>
-          <h1 className="pb-8 text-5xl font-bold md:text-7xl md:pb-8">DeMan</h1>
+          <h1 className="pb-8 text-5xl font-bold md:text-7xl md:pb-8">
+            De Man
+          </h1>
           <h2 className="text-2xl font-thin md:text-3xl pb-14 md:pb-16">
             Software Developer.
             <br />
@@ -111,6 +114,26 @@ export default function Home() {
 }
 
 /**
+        <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
+          <Card
+            link="mailto:rachelledeman@icloud.com"
+            title="Email"
+            description="example"
+            image="/mailLogo.svg"
+          />
+          <Card3
+            link="mailto:rachelledeman@icloud.com"
+            title="Email"
+            description="example"
+            image="/mailLogo.svg"
+          />
+        </div>
+        */
+
+/**
+
+ * 
+ * 
 <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
           <Card
             link="mailto:rachelledeman@icloud.com"
