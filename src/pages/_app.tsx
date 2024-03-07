@@ -19,7 +19,7 @@ const MainApp: AppType = ({ Component, pageProps }: AppProps) => {
           rel="stylesheet"
         />
         {/*<!-- HTML Meta Tags -->*/}
-        <title>Rachelle DeMan</title>
+        <title>Rachelle De Man</title>
         <meta
           name="description"
           content="Software Developer. Studying Computer Science at McMaster University."
@@ -28,7 +28,7 @@ const MainApp: AppType = ({ Component, pageProps }: AppProps) => {
         {/*<!-- Facebook Meta Tags -->*/}
         <meta property="og:url" content="https://rachelle.tech" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Rachelle DeMan" />
+        <meta property="og:title" content="Rachelle De Man" />
         <meta
           property="og:description"
           content="Software Developer. Studying Computer Science at McMaster University."
@@ -39,7 +39,7 @@ const MainApp: AppType = ({ Component, pageProps }: AppProps) => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta property="twitter:domain" content="rachelle.tech" />
         <meta property="twitter:url" content="https://rachelle.tech" />
-        <meta name="twitter:title" content="Rachelle DeMan" />
+        <meta name="twitter:title" content="Rachelle De Man" />
         <meta
           name="twitter:description"
           content="Software Developer. Studying Computer Science at McMaster University."
