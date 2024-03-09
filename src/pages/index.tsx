@@ -3,9 +3,7 @@ import { Inter } from "next/font/google";
 import SocialLink from "../components/SocialLink";
 import CurrentlyPlaying from "../components/LastFM";
 import CopyrightBeta from "../components/CopyrightBeta";
-import Card from "../components/Card2";
-import Card3 from "../components/Card3";
-import Card4 from "../components/Card4";
+import Card5 from "../components/Card5";
 
 //const inter = Inter({ subsets: ["latin"] });
 
@@ -114,6 +112,17 @@ export default function Home() {
 }
 
 /**
+ * 
+ * <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
+          <Card5
+            link="https://github.com/Krish120003/dash?tab=readme-ov-file"
+            title="Dash"
+            description="Customizable web dashboard that acts as a central hub for frequently
+            visited webpages. Hackathon project for Hack The North 2023."
+            image="/dash2.jpeg"
+          />
+        </div>
+        
         <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
           <Card
             link="mailto:rachelledeman@icloud.com"
