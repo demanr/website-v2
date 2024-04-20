@@ -6,10 +6,11 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    fontFamily: {
+    
+    extend: {
+      fontFamily: {
       sans: ["Red Hat Display", "Inter", "sans-serif"],
     },
-    extend: {
       backgroundImage: {
         "card-bg": "url('/public/cardBackground.svg')",
       },
@@ -31,6 +32,34 @@ module.exports = {
           "25%": { transform: "rotate(-3deg)" },
           "70%": { transform: "rotate(3deg)" },
           "100%": { transform: "rotate(0deg)" },
+        },
+        wiggleColour: {
+          0: { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+          "25%": { transform: "rotate(-1deg)" },
+          "50%": {backgroundPosition: '100% 50%'},
+          "70%": { transform: "rotate(-3deg)" },
+          "100%": { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+        },
+        wiggleColourReverse: {
+          0: { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+          "25%": { transform: "rotate(1deg)" },
+          "50%": {backgroundPosition: '100% 50%'},
+          "70%": { transform: "rotate(3deg)" },
+          "100%": { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+        },
+        wiggleColourMobile: {
+          0: { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+          "25%": { transform: "rotate(-1deg)" },
+          "50%": {backgroundPosition: '100% 50%'},
+          "70%": { transform: "rotate(-4deg)" },
+          "100%": { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+        },
+        wiggleColourReverseMobile: {
+          0: { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
+          "25%": { transform: "rotate(1deg)" },
+          "50%": {backgroundPosition: '100% 50%'},
+          "70%": { transform: "rotate(4deg)" },
+          "100%": { transform: "rotate(0deg)", backgroundPosition: '0% 50%' },
         },
         wiggleReverse: {
           0: { transform: "rotate(0deg)" },
@@ -77,7 +106,12 @@ module.exports = {
           "88.8%": {
             transform: "skewX(-0.1953125deg) skewY(-0.1953125deg)",
           },
+          
         },
+        background: {
+            '0%, 100%': { backgroundPosition: '0% 50%' },
+            '50%': { backgroundPosition: '100% 50%' },
+      },
         animation: {
           "fade-in-s": "fade 4.5s ease-in-out",
         },
@@ -95,6 +129,10 @@ module.exports = {
         wiggleB: "wiggleB 10s infinite",
         wiggleBReverse: "wiggleBReverse 10s infinite",
         jello: "jello 1s infinite",
+        bg: "wiggleColour ease-in-out 8s infinite",
+        bgReverse: "wiggleColourReverse ease-in-out 8s infinite",
+        bgMobile: "wiggleColourMobile ease-in-out 8s infinite",
+        bgReverseMobile: "wiggleColourReverseMobile ease-in-out 8s infinite"
       },
     },
     variants: {},
