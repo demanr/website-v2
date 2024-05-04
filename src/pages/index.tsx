@@ -78,7 +78,7 @@ export default function Home() {
           >
             Resume
           </a>
-          <div className="flex flex-col justify-center gap-4 pt-32 md:gap-12 md:pt-24 md:flex-row">
+          <div className="flex flex-col justify-center gap-4 pt-32 md:flex-wrap md:gap-12 md:pt-24 md:flex-row lg:w-3/4 xl:w-3/4">
             <SocialLink
               link="https://github.com/demanr"
               title="Github"
@@ -92,6 +92,12 @@ export default function Home() {
               logo="/linkedinLogo.svg"
             />
             <SocialLink
+              link="/photography"
+              title="Photography"
+              name="photography"
+              logo="/photographyLogo.svg"
+            />
+            <SocialLink
               link="mailto:rachelledeman@icloud.com"
               title="Email"
               name="rachelledeman@icloud.com"
@@ -99,11 +105,10 @@ export default function Home() {
             />
           </div>
         </main>
-        <div className="pb-12"></div>
         <div className="fixed bottom-0 right-0 z-10 w-full lg:w-fit lg:p-4 backdrop-blur-sm lg:backdrop-blur-0 min-h-[1px]">
           <CurrentlyPlaying />
         </div>
-        <div className="flex w-full">
+        <div className="flex w-full pt-8 h-max">
           <CopyrightBeta />
         </div>
       </div>
