@@ -193,13 +193,13 @@ const Photography: NextPage = () => {
         <h1 className="">Photography</h1>
         {/* <hr className="max-w-2xl" /> */}
         <div className="w-full max-w-2xl pt-4 pb-8 text-xl opacity-60">
-          I've always held an interest in photographing nature. As a kid, I'd
-          rush to finish dinner to try to catch the perfect sunset on my iPod.
-          In this day and age, most people carry a miniture camera everywhere
-          they go, myself included. Due to this, countless swiftly passing
-          sights are able to be kept in photo form, if only we take the moment
-          to witness them. Here is a small collection of the precious views I've
-          taken the time appreciate. Enjoy!
+          I&apos;ve always held an interest in photographing nature. As a kid,
+          I&apos;d rush to finish dinner to try to catch the perfect sunset on
+          my iPod. In this day and age, most people carry a miniture camera
+          everywhere they go, myself included. Due to this, countless swiftly
+          passing sights are able to be kept in photo form, if only we take the
+          moment to witness them. Here is a small collection of the precious
+          views I&apos;ve taken the time appreciate. Enjoy!
         </div>
       </div>
       {/* <hr className="max-w-2xl pb-8" /> */}
