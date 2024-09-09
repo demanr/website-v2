@@ -108,9 +108,9 @@ export default function Home() {
         <div className="fixed bottom-0 right-0 z-10 w-full lg:w-fit lg:p-4 backdrop-blur-sm lg:backdrop-blur-0 min-h-[1px]">
           <CurrentlyPlaying />
         </div>
-        <div className="flex w-full pt-8 h-max">
+        {/* <div className="flex w-full pt-8 h-max">
           <CopyrightBeta />
-        </div>
+        </div> */}
       </div>
     </div>
   );
