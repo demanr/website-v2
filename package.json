@@ -15,6 +15,7 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.40.0",
     "eslint-config-next": "14.2.2",
+    "hover-tilt": "^1.0.0",
     "next": "14.2.2",
     "postcss": "8.4.23",
     "posthog-js": "^1.128.1",

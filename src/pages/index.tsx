@@ -1,165 +1,155 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import SocialLink from "../components/SocialLink";
-import CurrentlyPlaying from "../components/LastFM";
 import CopyrightBeta from "../components/CopyrightBeta";
-import Card5 from "../components/Card5";
+import Navbar from "../components/Navbar";
+import BottomBar from "@/components/BottomBar";
+import SocialLinkMobile from "@/components/SocialLinksMobile";
+import TradingCard from "@/components/TradingCard";
 
 //const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const handleDesktopHorizontalWheel = (
+    event: React.WheelEvent<HTMLDivElement>,
+  ) => {
+    if (window.innerWidth < 768) return;
+
+    const horizontalContainer = event.currentTarget;
+    const nextScrollLeft = horizontalContainer.scrollLeft + event.deltaY;
+
+    if (nextScrollLeft !== horizontalContainer.scrollLeft) {
+      horizontalContainer.scrollLeft = nextScrollLeft;
+      event.preventDefault();
+    }
+  };
+
   return (
-    <div className="">
-      <div className="absolute w-full overflow-hidden -z-10">
-        <div className="relative w-full -translate-x-1/2 sm:left-1/3 sm:-translate-x-1/3 lg:left-1/2 lg:-translate-x-1/3">
-          <svg
-            viewBox="0 0 822 631"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-[200%] sm:w-[100%] lg:w-2/3"
-          >
-            <rect
-              x="419.584"
-              y="-302.327"
-              width="470.794"
-              height="805.9"
-              transform="rotate(31.3467 419.584 -302.327)"
-              fill="url(#paint0_linear_10_139)"
-            ></rect>
-            <rect
-              x="0.329346"
-              y="-57.3891"
-              width="470.794"
-              height="805.9"
-              transform="rotate(-31.35 0.329346 -57.3891)"
-              fill="url(#paint1_linear_10_139)"
-            ></rect>
-            <defs>
-              <linearGradient
-                id="paint0_linear_10_139"
-                x1="654.981"
-                y1="-302.327"
-                x2="654.981"
-                y2="503.573"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stop-color="#FF3257"></stop>
-                <stop offset="1" stop-color="#FF3257" stop-opacity="0"></stop>
-              </linearGradient>
-              <linearGradient
-                id="paint1_linear_10_139"
-                x1="235.726"
-                y1="-57.3891"
-                x2="235.726"
-                y2="748.511"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stop-color="#FF3257"></stop>
-                <stop offset="1" stop-color="#FF3257" stop-opacity="0"></stop>
-              </linearGradient>
-            </defs>
-          </svg>
+    <div className="flex flex-col w-full min-h-screen md:h-screen">
+      <Navbar />
+      {/* Mobile Only */}
+      <div className="w-full md:hidden">
+        <div className="relative min-h-[120px] overflow-hidden">
+          <div className="absolute inset-y-0 right-0 w-2/5 pointer-events-none">
+            <Image
+              src="/portrait.jpeg"
+              alt="Portrait"
+              fill
+              className="object-cover object-right"
+            />
+            <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-black to-transparent backdrop-blur-[1px]" />
+          </div>
+          <div className="relative z-10 flex flex-col items-start px-4 py-8 text-5xl">
+            <div className="">RACHELLE </div>
+            <div className="">DE MAN</div>
+          </div>
+        </div>
+        <div className="grid w-2/3 grid-cols-2 gap-1 pt-6 pl-4 pr-4 align-left">
+          <SocialLinkMobile
+            link="https://github.com/demanr"
+            title="Github"
+            name="demanr"
+            logo="/githubLogo.svg"
+          />
+          <SocialLinkMobile
+            link="https://www.linkedin.com/in/r-deman/"
+            title="LinkedIn"
+            name="r-deman"
+            logo="/linkedinLogo.svg"
+          />
+          <SocialLinkMobile
+            link="mailto:rachelledeman@icloud.com"
+            title="Email"
+            name="rachelledeman@icloud.com"
+            logo="/mailLogo.svg"
+          />
+        </div>
+        <div className="px-4 pt-8">
+          <TradingCard
+            name="Dash"
+            description="Customizable dashboard that acts as a hub for frequently visited webpages."
+            imageUrl="/dash2.jpeg"
+            githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+            tags={["Hackathon Project"]}
+          />
         </div>
       </div>
-      <div className="w-full h-full text-white align-center">
-        <main className="flex flex-col items-center justify-center w-full p-16 font-bold text-center md:p-24">
-          <h1 className="pt-12 text-5xl font-bold md:text-7xl">Rachelle</h1>
-          <h1 className="pb-8 text-5xl font-bold md:text-7xl md:pb-8">
-            De Man
-          </h1>
-          <h2 className="text-2xl font-thin md:text-3xl pb-14 md:pb-16">
-            Software Developer.
-            <br />
-            CS Student @ McMaster.
-          </h2>
-          <a
-            className="text-xl md:text-2xl py-2 px-6 md:py-4 md:px-10 bg-[#D42C4B] rounded-xl transition ease-in-out hover:scale-110"
-            href="/RachelleDeManResume.pdf"
+
+        <div className="hidden h-full md:block">
+          <div
+            className="h-full overflow-x-auto"
+            onWheel={handleDesktopHorizontalWheel}
           >
-            Resume
-          </a>
-          <div className="flex flex-col justify-center gap-4 pt-32 md:flex-wrap md:gap-12 md:pt-24 md:flex-row lg:w-3/4 xl:w-3/4">
-            <SocialLink
-              link="https://github.com/demanr"
-              title="Github"
-              name="demanr"
-              logo="/githubLogo.svg"
-            />
-            <SocialLink
-              link="https://www.linkedin.com/in/r-deman/"
-              title="LinkedIn"
-              name="r-deman"
-              logo="/linkedinLogo.svg"
-            />
-            <SocialLink
-              link="/photography"
-              title="Photography"
-              name="photography"
-              logo="/photographyLogo.svg"
-            />
-            <SocialLink
-              link="mailto:rachelledeman@icloud.com"
-              title="Email"
-              name="rachelledeman@icloud.com"
-              logo="/mailLogo.svg"
-            />
-          </div>
-        </main>
-        <div className="fixed bottom-0 right-0 z-10 w-full lg:w-fit lg:p-4 backdrop-blur-sm lg:backdrop-blur-0 min-h-[1px]">
-          <CurrentlyPlaying />
+            <div className="flex items-start h-full">
+              <div className="relative h-full min-w-[38vw]">
+                <Image
+                  src="/portrait.jpeg"
+                  alt="Portrait"
+                  fill
+                  className="object-cover object-right"
+                />
+                <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
+              </div>
+              <div className="min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
+                <h1 className="pb-10">Hello there!</h1>
+                <p className="pb-4">TBA Long intro description</p>
+                <p className="pb-4">
+                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+                <p className="pb-4">
+                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                  eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                  enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                  nisi ut aliquip ex ea commodo consequat.
+                </p>
+                <p className="pb-4">
+                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+                <p>Yippee!</p>
+              </div>
+              <div className="min-w-[26rem] px-10 pt-20 pb-10">
+                <TradingCard
+                  name="Dash"
+                  description="Customizable dashboard that acts as a hub for frequently visited webpages."
+                  imageUrl="/dash2.jpeg"
+                  githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+                  tags={["Hackathon Project"]}
+                />
+              </div>
+            </div>
         </div>
-        {/* <div className="flex w-full pt-8 h-max">
-          <CopyrightBeta />
-        </div> */}
+      </div>
+      <div className="hidden md:block">
+        <BottomBar />
       </div>
     </div>
   );
 }
 
-/**
- * 
- * <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card5
-            link="https://github.com/Krish120003/dash?tab=readme-ov-file"
-            title="Dash"
-            description="Customizable web dashboard that acts as a central hub for frequently
-            visited webpages. Hackathon project for Hack The North 2023."
-            image="/dash2.jpeg"
-          />
-        </div>
-        
-        <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-          <Card3
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-        </div>
-        */
-
-/**
-
- * 
- * 
-<div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-          <Card3
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-        </div>
- */
+//  <div className="flex flex-col justify-center gap-4 pt-32 md:flex-wrap md:gap-12 md:pt-24 md:flex-row lg:w-3/4 xl:w-3/4">
+//    <SocialLink
+//      link="https://github.com/demanr"
+//      title="Github"
+//      name="demanr"
+//      logo="/githubLogo.svg"
+//    />
+//    <SocialLink
+//      link="https://www.linkedin.com/in/r-deman/"
+//      title="LinkedIn"
+//      name="r-deman"
+//      logo="/linkedinLogo.svg"
+//    />
+//    <SocialLink
+//      link="/photography"
+//      title="Photography"
+//      name="photography"
+//      logo="/photographyLogo.svg"
+//    />
+//    <SocialLink
+//      link="mailto:rachelledeman@icloud.com"
+//      title="Email"
+//      name="rachelledeman@icloud.com"
+//      logo="/mailLogo.svg"
+//    />
+//  </div>;
