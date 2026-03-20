@@ -64,24 +64,35 @@ export default function TradingCard({
 	return (
     <hover-tilt
       tilt-factor="0.4"
-      scale-factor="1.2"
+      scale-factor="1.25"
       glare-mask-composite="add"
-      blend-mode="luminosity"
-      glare-intensity={0.4}
-      //   glare-mask="url('/CardTexture.jpg')"
+      blend-mode="hard-light"
+      glare-intensity={0.5}
+      glare-mask="url('/circular_texture.jpeg')"
       glare-mask-mode="luminance"
-      class="[&::part(container)]:rounded-3xl [&::part(container)]:z-50 [&::part(tilt)]:z-50"
+      class="[&::part(container)]:rounded-3xl "
     >
       <div
-        className="z-[-10] bg-slate-800 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 aspect-[3/5] rounded-xl border-4 "
+        className="z-[-10] bg-slate-800 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 aspect-[3/5] rounded-xl border-4"
+        // version 1
         style={{
-          width: "320px",
+          width: "340px",
           //   aspectRatio: "2 / 5",
           backgroundImage:
-            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px), repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px), url(/CardTexture.jpg)",
-          backgroundSize: "100% 100%, 100% 100%, auto",
+            "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), linear-gradient(rgba(26,26,26,.35), rgba(26,26,26,.35)), linear-gradient(rgba(26,26,26,.8), rgba(26,26,26,.8)), url('/CardTexture.jpeg')",
+          backgroundSize: "100% 100%, 100% 100%, 100% 100%, 100% 100%, 220px 220px",
           backgroundColor: "#1a1a1a",
         }}
+        //  version 2
+        // style={{
+        //   width: "320px",
+        //   backgroundImage:
+        //     "linear-gradient(rgba(10,14,20,.58), rgba(10,14,20,.58)), radial-gradient(circle at 25% 15%, rgba(120,170,210,.12), transparent 45%), url('/ice_texture.png')",
+        //   backgroundBlendMode: "multiply, soft-light, normal",
+        //   backgroundSize: "100% 100%, 100% 100%, 220px 220px",
+        //   backgroundPosition: "center, center, center",
+        //   backgroundColor: "#0f141b",
+        // }}
       >
         <div className="flex items-center justify-between p-3 border-b border-white/20">
           <h3 className="text-sm font-bold tracking-wide text-white">{name}</h3>
@@ -118,7 +129,7 @@ export default function TradingCard({
             src={imageUrl}
             alt={name}
             fill
-            className="object-cover w-full h-full"
+            className="object-cover w-full h-full "
           />
         </div>
 
@@ -126,7 +137,7 @@ export default function TradingCard({
           <p className="text-sm leading-relaxed text-gray-200">{description}</p>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 flex gap-2 p-3 border-t border-white/20 bg-black/30 backdrop-blur-sm">
+        <div className="absolute bottom-0 left-0 right-0 flex gap-2 p-3 border-t border-white/20 bg-black/30 backdrop-blur-xs">
           {githubUrl && (
             <a
               href={githubUrl}

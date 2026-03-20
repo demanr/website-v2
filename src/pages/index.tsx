@@ -90,11 +90,11 @@ export default function Home() {
 
       <div className="hidden h-full md:block">
         <div
-          className="h-full overflow-x-auto"
+          className="h-full overflow-x-auto "
           onWheel={handleDesktopHorizontalWheel}
         >
           <div className="flex items-start h-full">
-            <div className="relative h-full min-w-[38vw]">
+            <div className="relative h-[95%] min-w-[38vw]">
               <Image
                 src="/portrait.jpeg"
                 alt="Portrait"
@@ -122,7 +122,7 @@ export default function Home() {
               </p>
               <p>Yippee!</p>
             </div>
-            <div className="min-w-[26rem] px-10 pt-20 pb-10 flex gap-16">
+            <div className="min-w-[26rem] px-10 pt-20 pb-10 flex gap-32 z-50">
               <TradingCard
                 name="Dash"
                 description="Customizable dashboard that acts as a hub for frequently visited webpages."
@@ -170,7 +170,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="hidden md:block">
+      <div className="absolute bottom-0 hidden bg-black md:block">
         <BottomBar />
       </div>
     </div>
