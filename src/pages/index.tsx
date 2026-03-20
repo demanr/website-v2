@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import BottomBar from "@/components/BottomBar";
 import SocialLinkMobile from "@/components/SocialLinksMobile";
 import TradingCard from "@/components/TradingCard";
+import ProjectCard from "@/components/ProjectCard";
 
 //const inter = Inter({ subsets: ["latin"] });
 
@@ -69,55 +70,104 @@ export default function Home() {
             description="Customizable dashboard that acts as a hub for frequently visited webpages."
             imageUrl="/dash2.jpeg"
             githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+            tech={[
+              { name: "GitHub", icon: "/githubLogo.svg" },
+              { name: "LinkedIn", icon: "/linkedinLogo.svg" },
+            ]}
             tags={["Hackathon Project"]}
+          />
+          <ProjectCard
+            title="Project Title"
+            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+            imageUrl="/dash2.jpeg"
+            links={[
+              { label: "GitHub", href: "https://github.com" },
+              { label: "Live Demo", href: "https://example.com" },
+            ]}
           />
         </div>
       </div>
 
-        <div className="hidden h-full md:block">
-          <div
-            className="h-full overflow-x-auto"
-            onWheel={handleDesktopHorizontalWheel}
-          >
-            <div className="flex items-start h-full">
-              <div className="relative h-full min-w-[38vw]">
-                <Image
-                  src="/portrait.jpeg"
-                  alt="Portrait"
-                  fill
-                  className="object-cover object-right"
-                />
-                <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
-              </div>
-              <div className="min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
-                <h1 className="pb-10">Hello there!</h1>
-                <p className="pb-4">TBA Long intro description</p>
-                <p className="pb-4">
-                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-                <p className="pb-4">
-                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                  eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                  enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                  nisi ut aliquip ex ea commodo consequat.
-                </p>
-                <p className="pb-4">
-                  lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                  eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </p>
-                <p>Yippee!</p>
-              </div>
-              <div className="min-w-[26rem] px-10 pt-20 pb-10">
-                <TradingCard
-                  name="Dash"
-                  description="Customizable dashboard that acts as a hub for frequently visited webpages."
-                  imageUrl="/dash2.jpeg"
-                  githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
-                  tags={["Hackathon Project"]}
-                />
-              </div>
+      <div className="hidden h-full md:block">
+        <div
+          className="h-full overflow-x-auto"
+          onWheel={handleDesktopHorizontalWheel}
+        >
+          <div className="flex items-start h-full">
+            <div className="relative h-full min-w-[38vw]">
+              <Image
+                src="/portrait.jpeg"
+                alt="Portrait"
+                fill
+                className="object-cover object-right"
+              />
+              <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
             </div>
+            <div className="min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
+              <h1 className="pb-10">Hello there!</h1>
+              <p className="pb-4">TBA Long intro description</p>
+              <p className="pb-4">
+                lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+              <p className="pb-4">
+                lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                nisi ut aliquip ex ea commodo consequat.
+              </p>
+              <p className="pb-4">
+                lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+              <p>Yippee!</p>
+            </div>
+            <div className="min-w-[26rem] px-10 pt-20 pb-10 flex gap-16">
+              <TradingCard
+                name="Dash"
+                description="Customizable dashboard that acts as a hub for frequently visited webpages."
+                imageUrl="/dash2.jpeg"
+                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+                tech={[
+                  { name: "GitHub", icon: "/githubLogo.svg" },
+                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
+                ]}
+                tags={["Hackathon Project"]}
+              />
+              <TradingCard
+                name="Dash"
+                description="Customizable dashboard that acts as a hub for frequently visited webpages."
+                imageUrl="/dash2.jpeg"
+                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+                tech={[
+                  { name: "GitHub", icon: "/githubLogo.svg" },
+                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
+                ]}
+                tags={["Hackathon Project"]}
+              />
+              <TradingCard
+                name="Dash"
+                description="Customizable dashboard that acts as a hub for frequently visited webpages."
+                imageUrl="/dash2.jpeg"
+                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
+                tech={[
+                  { name: "GitHub", icon: "/githubLogo.svg" },
+                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
+                ]}
+                tags={["Hackathon Project"]}
+              />
+              {/* <ProjectCard
+                title="Project Title"
+                tech={[{ name: "test", icon: "/githubLogo.svg" }]}
+                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                imageUrl="/dash2.jpeg"
+                links={[
+                  { label: "GitHub", href: "https://github.com" },
+                  { label: "Live Demo", href: "https://example.com" },
+                ]}
+              /> */}
+            </div>
+          </div>
         </div>
       </div>
       <div className="hidden md:block">
