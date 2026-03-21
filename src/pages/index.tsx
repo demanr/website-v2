@@ -79,7 +79,7 @@ export default function Home() {
             logo="/mailLogo.svg"
           />
         </div>
-        <div className="flex flex-col gap-12 px-4 pt-8 mx-auto max-w-fit">
+        <div className="flex flex-col gap-12 px-4 pt-12 mx-auto max-w-fit">
           {tradingCards.map((card, index) => (
             <TradingCard
               key={`mobile-card-${index}`}

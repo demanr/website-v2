@@ -90,7 +90,8 @@ export default function TradingCard({
       glare-intensity={0.5}
       glare-mask="url('/circular_texture.jpeg')"
       glare-mask-mode="luminance"
-      class="[&::part(container)]:rounded-3xl [&::part(container)]:overscroll-y-auto"
+      style={{ touchAction: "pan-y" }}
+      class="[touch-action:pan-y] [&::part(container)]:rounded-3xl [&::part(container)]:[touch-action:pan-y]"
     >
       <div
         className="-z-10 bg-slate-800 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 2xl:w-96 aspect-[3/5] rounded-xl border-4 border-white/60"
