@@ -28,7 +28,7 @@ export default function Home() {
     {
       name: "Tango",
       description:
-        "Apple Intelligence if it was actually useful. A Voice activated AI helper that flows uses the clipboard to streamline responses.\nWinner of HTN 2025.",
+        "Apple Intelligence if it was actually useful. A voice activated AI helper that flows uses the clipboard to streamline responses.\nWinner of Hack the North 2025.",
       imageUrl: "/tango.jpeg",
       githubUrl: "https://github.com/demanr/tango",
       altUrl: "https://devpost.com/software/tango-q37d4z",
@@ -57,6 +57,20 @@ export default function Home() {
       tags: ["Hackathon"],
     },
     {
+      name: "DeltaHacks",
+      description:
+        "Technical Executive for DeltaHacks, McMaster University's official hackathon.\nBuilt landing page, user portal, and more across 4 years.",
+      imageUrl: "/deltahacks.png",
+      githubUrl: "https://github.com/deltahacks",
+      altUrl: "https://archive.deltahacks.com/",
+      altUrlLabel: "Site Archive",
+      tech: [
+        { name: "React", icon: SiReact },
+        { name: "Next.js", icon: SiNextdotjs },
+      ],
+      tags: ["Volunteer"],
+    },
+    {
       name: "Integrity",
       description:
         "Tool to scan hackathon submissions and flag any foul play using heuristics and AI.\nIncludes similarity scanning across projects, suspicious commit detection, and contributor verification.",
@@ -73,7 +87,7 @@ export default function Home() {
     {
       name: "Dash",
       description:
-        "Customizable dashboard that acts as a hub for frequently visited web sources. \n\n Built for HTN 2023.",
+        "Customizable dashboard that acts as a hub for frequently visited web sources. \n\n Built for Hack the North 2023.",
       imageUrl: "/dash2.jpeg",
       githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
       altUrl: "https://devpost.com/software/dash-um2zil",
