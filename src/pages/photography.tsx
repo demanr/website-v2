@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import React from "react";
 import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
 import { useScreen } from "usehooks-ts";
 
 import img1 from "../../public/photography/IMG_0673 2.jpeg";
@@ -188,18 +189,24 @@ const Photography: NextPage = () => {
   const screen = useScreen();
 
   return (
-    <div className="px-8 py-8 font-serif text-6xl">
+    <div className="px-8 py-8 text-4xl md:text-6xl">
       <div className="px-2">
+        <a
+          href="/"
+          className="inline-block pb-2 text-base md:pb-4 md:text-xl opacity-70 hover:opacity-100"
+        >
+          ← Back
+        </a>
         <h1 className="">Photography</h1>
         {/* <hr className="max-w-2xl" /> */}
-        <div className="w-full max-w-2xl pt-4 pb-8 text-xl opacity-60">
+        <div className="w-full max-w-2xl pt-4 pb-8 text-lg leading-5 md:leading-6 md:text-xl opacity-60">
           I&apos;ve always loved taking pictures of nature. When I was a kid,
-          I&apos;d rush to finish dinner just to try and catch the perfect
-          sunset on my iPod. In this day and age, most people carry a miniture
-          camera everywhere they go, myself included. For the first time in
-          human history we can all capture the beautiful sights we see going
-          about our day to day. Here is a small collection of the precious views
-          I&apos;ve had the luxury of seeing, and capturing.
+          I&apos;d rush to finish dinner to try and make it in time to catch the
+          perfect sunset on my iPod. In this day and age, most people carry a
+          miniture camera everywhere they go, myself included. For the first
+          time in human history it's possible to capture all the beautiful
+          sights we see in our day to day. Here is a small collection of the
+          precious views I&apos;ve had the luxury of seeing, and capturing.
         </div>
       </div>
       {/* <hr className="max-w-2xl pb-8" /> */}

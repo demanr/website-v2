@@ -6,6 +6,7 @@ import React from "react";
 // pages/_app.js
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import Script from "next/script";
 
 if (typeof window !== "undefined") {
   // checks that we are client-side
@@ -64,6 +65,8 @@ const MainApp: AppType = ({
           />
           <meta name="twitter:image" content=" " />
           {/*<!-- Meta Tags Generated via https://www.opengraph.xyz -->*/}
+                  <Script type="module" src="https://cdn.jsdelivr.net/npm/hover-tilt/dist/hover-tilt.js"/>
+
         </Head>
         <Component {...pageProps} />
       </div>

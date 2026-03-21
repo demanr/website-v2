@@ -1,165 +1,297 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import SocialLink from "../components/SocialLink";
-import CurrentlyPlaying from "../components/LastFM";
 import CopyrightBeta from "../components/CopyrightBeta";
-import Card5 from "../components/Card5";
+import Navbar from "../components/Navbar";
+import BottomBar from "@/components/BottomBar";
+import SocialLinkMobile from "@/components/SocialLinksMobile";
+import TradingCard from "@/components/TradingCard";
+import ProjectCard from "@/components/ProjectCard";
+import {
+  SiCplusplus,
+  SiNextdotjs,
+  SiPython,
+  SiReact,
+  SiTailwindcss,
+  SiTypescript,
+  SiGooglegemini,
+  SiOpencv,
+} from "react-icons/si";
+
+import { IoHardwareChipOutline } from "react-icons/io5";
+
+import { RiRobot2Line } from "react-icons/ri";
 
 //const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const tradingCards = [
+    {
+      name: "Tango",
+      description:
+        "Apple Intelligence if it was actually useful. A Voice activated AI helper that flows uses the clipboard to streamline responses.\nWinner of HTN 2025.",
+      imageUrl: "/tango.jpeg",
+      githubUrl: "https://github.com/demanr/tango",
+      altUrl: "https://devpost.com/software/tango-q37d4z",
+      altUrlLabel: "Devpost",
+      tech: [
+        { name: "Gemini", icon: SiGooglegemini },
+        { name: "TypeScript", icon: SiTypescript },
+        { name: "Tailwind CSS", icon: SiTailwindcss },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Bracket Bot",
+      description:
+        "Autonomous lane driving robot that navigates using OpenCV-based detection and centering.\nWinner at Bracket Bot hackathon. ",
+      imageUrl: "/bracketbot.png",
+      githubUrl: "https://github.com/Krish120003/lane-centering-bracketbot",
+      altUrl:
+        "https://github.com/Krish120003/lane-centering-bracketbot?tab=readme-ov-file#how",
+      altUrlLabel: "Video Demo",
+      tech: [
+        // { name: "Hardware", icon: RiRobot2Line },
+        { name: "OpenCV", icon: SiOpencv },
+        { name: "Python", icon: SiPython },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Integrity",
+      description:
+        "Tool to scan hackathon submissions and flag any foul play using heuristics and AI.\nIncludes similarity scanning across projects, suspicious commit detection, and contributor verification.",
+      imageUrl: "/integrity.jpeg",
+      githubUrl: "https://github.com/krish120003/integrity",
+      //   altUrl: "https://devpost.com/software/tango-q37d4z",
+      //   altUrlLabel: "Devpost",
+      tech: [
+        { name: "Gemini", icon: SiGooglegemini },
+        { name: "Python", icon: SiPython },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Dash",
+      description:
+        "Customizable dashboard that acts as a hub for frequently visited web sources. \n\n Built for HTN 2023.",
+      imageUrl: "/dash2.jpeg",
+      githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
+      altUrl: "https://devpost.com/software/dash-um2zil",
+      altUrlLabel: "Devpost",
+      tech: [
+        { name: "React", icon: SiReact },
+        { name: "Next.js", icon: SiNextdotjs },
+        { name: "TypeScript", icon: SiTypescript },
+        { name: "Tailwind CSS", icon: SiTailwindcss },
+      ],
+      tags: ["Hackathon"],
+    },
+  ];
+
+  const handleDesktopHorizontalWheel = (
+    event: React.WheelEvent<HTMLDivElement>,
+  ) => {
+    if (window.innerWidth < 768) return;
+
+    const horizontalContainer = event.currentTarget;
+    const nextScrollLeft = horizontalContainer.scrollLeft + event.deltaY;
+
+    if (nextScrollLeft !== horizontalContainer.scrollLeft) {
+      horizontalContainer.scrollLeft = nextScrollLeft;
+      event.preventDefault();
+    }
+  };
+
   return (
-    <div className="">
-      <div className="absolute w-full overflow-hidden -z-10">
-        <div className="relative w-full -translate-x-1/2 sm:left-1/3 sm:-translate-x-1/3 lg:left-1/2 lg:-translate-x-1/3">
-          <svg
-            viewBox="0 0 822 631"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-[200%] sm:w-[100%] lg:w-2/3"
-          >
-            <rect
-              x="419.584"
-              y="-302.327"
-              width="470.794"
-              height="805.9"
-              transform="rotate(31.3467 419.584 -302.327)"
-              fill="url(#paint0_linear_10_139)"
-            ></rect>
-            <rect
-              x="0.329346"
-              y="-57.3891"
-              width="470.794"
-              height="805.9"
-              transform="rotate(-31.35 0.329346 -57.3891)"
-              fill="url(#paint1_linear_10_139)"
-            ></rect>
-            <defs>
-              <linearGradient
-                id="paint0_linear_10_139"
-                x1="654.981"
-                y1="-302.327"
-                x2="654.981"
-                y2="503.573"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stop-color="#FF3257"></stop>
-                <stop offset="1" stop-color="#FF3257" stop-opacity="0"></stop>
-              </linearGradient>
-              <linearGradient
-                id="paint1_linear_10_139"
-                x1="235.726"
-                y1="-57.3891"
-                x2="235.726"
-                y2="748.511"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop stop-color="#FF3257"></stop>
-                <stop offset="1" stop-color="#FF3257" stop-opacity="0"></stop>
-              </linearGradient>
-            </defs>
-          </svg>
+    <div className="flex flex-col w-full min-h-screen md:h-screen">
+      <Navbar />
+
+      {/* Mobile Only */}
+      <div className="w-full md:hidden">
+        <div
+          id="portfolio-mobile"
+          className="relative min-h-[120px] overflow-hidden"
+        >
+          <div className="absolute inset-y-0 right-0 w-2/5 pointer-events-none">
+            <Image
+              src="/portrait.jpeg"
+              alt="Portrait"
+              fill
+              className="object-cover object-right"
+            />
+            <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-black to-transparent backdrop-blur-[1px]" />
+          </div>
+          <div className="relative z-10 flex flex-col items-start px-4 py-8 text-5xl">
+            <div className="">RACHELLE </div>
+            <div className="">DE MAN</div>
+          </div>
         </div>
-      </div>
-      <div className="w-full h-full text-white align-center">
-        <main className="flex flex-col items-center justify-center w-full p-16 font-bold text-center md:p-24">
-          <h1 className="pt-12 text-5xl font-bold md:text-7xl">Rachelle</h1>
-          <h1 className="pb-8 text-5xl font-bold md:text-7xl md:pb-8">
-            De Man
-          </h1>
-          <h2 className="text-2xl font-thin md:text-3xl pb-14 md:pb-16">
-            Software Developer.
-            <br />
-            CS Student @ McMaster.
-          </h2>
+        <div className="grid w-2/3 grid-cols-2 gap-1 pt-6 pl-4 pr-4 align-left">
+          <SocialLinkMobile
+            link="https://github.com/demanr"
+            title="Github"
+            name="demanr"
+            logo="/githubLogo.svg"
+          />
+          <SocialLinkMobile
+            link="https://www.linkedin.com/in/r-deman/"
+            title="LinkedIn"
+            name="r-deman"
+            logo="/linkedinLogo.svg"
+          />
           <a
-            className="text-xl md:text-2xl py-2 px-6 md:py-4 md:px-10 bg-[#D42C4B] rounded-xl transition ease-in-out hover:scale-110"
+            className="flex items-center gap-2 font-bold text-white transition ease-in-out justify-left md:justify-center hover:scale-110"
             href="/RachelleDeManResume.pdf"
           >
-            Resume
+            <img className="w-4 h-4" src={"/resumeLogo.svg"} alt="resume" />
+            <p className="text-md">resume</p>
           </a>
-          <div className="flex flex-col justify-center gap-4 pt-32 md:flex-wrap md:gap-12 md:pt-24 md:flex-row lg:w-3/4 xl:w-3/4">
-            <SocialLink
-              link="https://github.com/demanr"
-              title="Github"
-              name="demanr"
-              logo="/githubLogo.svg"
-            />
-            <SocialLink
-              link="https://www.linkedin.com/in/r-deman/"
-              title="LinkedIn"
-              name="r-deman"
-              logo="/linkedinLogo.svg"
-            />
-            <SocialLink
-              link="/photography"
-              title="Photography"
-              name="photography"
-              logo="/photographyLogo.svg"
-            />
-            <SocialLink
-              link="mailto:rachelledeman@icloud.com"
-              title="Email"
-              name="rachelledeman@icloud.com"
-              logo="/mailLogo.svg"
-            />
-          </div>
-        </main>
-        <div className="fixed bottom-0 right-0 z-10 w-full lg:w-fit lg:p-4 backdrop-blur-sm lg:backdrop-blur-0 min-h-[1px]">
-          <CurrentlyPlaying />
         </div>
-        {/* <div className="flex w-full pt-8 h-max">
-          <CopyrightBeta />
-        </div> */}
+        <div className="px-8 pt-8 my-auto text-md font-mulish">
+          <p className="pb-8">
+            I'm Rachelle. Programmer, crocheter, and game lover. Here are a few
+            of my favourite projects, both technical and otherwise. I'm always
+            open to chat, so feel free to reach out!
+          </p>
+        </div>
+        <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
+          PROJECTS
+        </h2>
+        <div
+          id="projects-mobile"
+          className="flex flex-col gap-12 px-4 pt-12 mx-auto max-w-fit"
+        >
+          {tradingCards.map((card, index) => (
+            <TradingCard
+              key={`mobile-card-${index}`}
+              name={card.name}
+              description={card.description}
+              imageUrl={card.imageUrl}
+              githubUrl={card.githubUrl}
+              altUrl={card.altUrl}
+              altUrlLabel={card.altUrlLabel}
+              tech={card.tech}
+              tags={card.tags}
+            />
+          ))}
+        </div>
+        <div
+          id="positions-mobile"
+          className="flex flex-col items-center px-4 pt-20 pb-32"
+        >
+          <Image
+            src="/minecraft_under_construction.png"
+            alt="Under construction"
+            width={700}
+            height={394}
+            className="w-48 h-auto max-w-md"
+            priority
+          />
+        </div>
+      </div>
+
+      <div className="hidden h-full md:block">
+        <div
+          id="home-scroll-desktop"
+          className="h-full overflow-x-auto "
+          onWheel={handleDesktopHorizontalWheel}
+        >
+          <div className="flex items-start h-full my-auto">
+            <div
+              id="portfolio-desktop"
+              className="relative h-[95%] min-w-[38vw]"
+            >
+              <Image
+                src="/portrait.jpeg"
+                alt="Portrait"
+                fill
+                className="object-cover object-right"
+              />
+              <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
+            </div>
+            <div className=" min-w-[32rem] px-10 pb-10 my-auto lg:text-lg xl:text-2xl 2xl:text-3xl">
+              <h1 className="pb-10">Hello there!</h1>
+              <p className="pb-4">
+                I'm Rachelle. Programmer, crocheter, and game lover.
+              </p>
+              <p className="pb-4">
+                Welcome to my showcase. Here you can find some of my favourite
+                projects- both technical and otherwise.
+              </p>
+              <p className="pb-4">
+                If you’re curious about anything I’ve done (or want to chat
+                about your work) feel free to reach out! I’m always willing to
+                trade cards.
+              </p>
+              <p className="pb-4">
+                I'm best reached through Email, LinkedIn, or Twitter.
+              </p>
+              <p className="pb-4 text-base opacity-50 xl:text-lg 2xl:text-2xl">...Scroll for more →</p>
+            </div>
+            <div
+              id="projects-desktop"
+              className="min-w-[26rem] pl-40 px-10 pt-10 pb-20 flex gap-32 my-auto flex-none z-50"
+            >
+              {tradingCards.map((card, index) => (
+                <TradingCard
+                  key={`desktop-card-${index}`}
+                  name={card.name}
+                  description={card.description}
+                  imageUrl={card.imageUrl}
+                  githubUrl={card.githubUrl}
+                  altUrl={card.altUrl}
+                  altUrlLabel={card.altUrlLabel}
+                  tech={card.tech}
+                  tags={card.tags}
+                />
+              ))}
+            </div>
+            <div
+              id="positions-desktop"
+              className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10"
+            >
+              <Image
+                src="/minecraft_under_construction.png"
+                alt="Under construction"
+                width={700}
+                height={394}
+                className="right-0 h-auto max-w-md w-60"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-0 hidden w-full bg-black md:block">
+        <BottomBar />
       </div>
     </div>
   );
 }
 
-/**
- * 
- * <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card5
-            link="https://github.com/Krish120003/dash?tab=readme-ov-file"
-            title="Dash"
-            description="Customizable web dashboard that acts as a central hub for frequently
-            visited webpages. Hackathon project for Hack The North 2023."
-            image="/dash2.jpeg"
-          />
-        </div>
-        
-        <div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-          <Card3
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-        </div>
-        */
-
-/**
-
- * 
- * 
-<div className="flex flex-col items-center justify-center w-full gap-4 p-8 md:flex-row md:gap-12">
-          <Card
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-          <Card3
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            description="example"
-            image="/mailLogo.svg"
-          />
-        </div>
- */
+//  <div className="flex flex-col justify-center gap-4 pt-32 md:flex-wrap md:gap-12 md:pt-24 md:flex-row lg:w-3/4 xl:w-3/4">
+//    <SocialLink
+//      link="https://github.com/demanr"
+//      title="Github"
+//      name="demanr"
+//      logo="/githubLogo.svg"
+//    />
+//    <SocialLink
+//      link="https://www.linkedin.com/in/r-deman/"
+//      title="LinkedIn"
+//      name="r-deman"
+//      logo="/linkedinLogo.svg"
+//    />
+//    <SocialLink
+//      link="/photography"
+//      title="Photography"
+//      name="photography"
+//      logo="/photographyLogo.svg"
+//    />
+//    <SocialLink
+//      link="mailto:rachelledeman@icloud.com"
+//      title="Email"
+//      name="rachelledeman@icloud.com"
+//      logo="/mailLogo.svg"
+//    />
+//  </div>;

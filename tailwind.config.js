@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       fontFamily: {
       sans: ["Red Hat Display", "Inter", "sans-serif"],
+      mulish: ["Mulish", "sans-serif"],
     },
       backgroundImage: {
         "card-bg": "url('/public/cardBackground.svg')",
