@@ -73,11 +73,11 @@ export default function Home() {
     {
       name: "Dash",
       description:
-        "Customizable dashboard that acts as a hub for frequently visited webpages. \n\n Built for HTN 2024.",
+        "Customizable dashboard that acts as a hub for frequently visited web sources. \n\n Built for HTN 2023.",
       imageUrl: "/dash2.jpeg",
       githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
-      altUrl: "https://github.com/Krish120003/dash",
-      altUrlLabel: "Project Link",
+      altUrl: "https://devpost.com/software/dash-um2zil",
+      altUrlLabel: "Devpost",
       tech: [
         { name: "React", icon: SiReact },
         { name: "Next.js", icon: SiNextdotjs },
@@ -147,6 +147,16 @@ export default function Home() {
             <p className="text-md">resume</p>
           </a>
         </div>
+        <div className="px-8 pt-8 my-auto text-md font-mulish">
+          <p className="pb-8">
+            I'm Rachelle. Programmer, crocheter, and game lover.
+            Here are a few of my favourite projects, both technical and otherwise.
+            I'm always open to chat, so feel free to reach out!
+          </p>
+        </div>
+        <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
+          PROJECTS
+        </h2>
         <div
           id="projects-mobile"
           className="flex flex-col gap-12 px-4 pt-12 mx-auto max-w-fit"
@@ -167,7 +177,7 @@ export default function Home() {
         </div>
         <div
           id="positions-mobile"
-          className="flex flex-col items-center px-4 pt-20 pb-16"
+          className="flex flex-col items-center px-4 pt-20 pb-32"
         >
           <Image
             src="/minecraft_under_construction.png"
