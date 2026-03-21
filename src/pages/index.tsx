@@ -63,7 +63,7 @@ export default function Home() {
       imageUrl: "/deltahacks.png",
       githubUrl: "https://github.com/deltahacks",
       altUrl: "https://archive.deltahacks.com/",
-      altUrlLabel: "Site Archive",
+      altUrlLabel: "Web Archive",
       tech: [
         { name: "React", icon: SiReact },
         { name: "Next.js", icon: SiNextdotjs },
