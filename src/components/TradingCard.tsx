@@ -91,7 +91,7 @@ export default function TradingCard({
       scale-factor={isBelowMd ? 1.1 : 1.25}
       glare-mask-composite="add"
       blend-mode="hard-light"
-      glare-intensity={0.5}
+      glare-intensity={0.6}
       glare-mask="url('/circular_texture.jpeg')"
       glare-mask-mode="luminance"
       style={{ touchAction: "pan-y" }}

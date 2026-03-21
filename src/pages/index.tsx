@@ -143,14 +143,20 @@ export default function Home() {
             className="flex items-center gap-2 font-bold text-white transition ease-in-out justify-left md:justify-center hover:scale-110"
             href="/RachelleDeManResume.pdf"
           >
-            <img className="w-4 h-4" src={"/resumeLogo.svg"} alt="resume" />
+            <Image
+              className="w-4 h-4"
+              src="/resumeLogo.svg"
+              alt="resume"
+              width={16}
+              height={16}
+            />
             <p className="text-md">resume</p>
           </a>
         </div>
         <div className="px-8 pt-8 my-auto text-md font-mulish">
           <p className="pb-8">
-            I'm Rachelle. Programmer, crocheter, and game lover. Here are a few
-            of my favourite projects, both technical and otherwise. I'm always
+            I&apos;m Rachelle. Programmer, crocheter, and game lover. Here are a few
+            of my favourite projects, both technical and otherwise. I&apos;m always
             open to chat, so feel free to reach out!
           </p>
         </div>
@@ -212,7 +218,7 @@ export default function Home() {
             <div className=" min-w-[32rem] px-10 pb-10 my-auto lg:text-lg xl:text-2xl 2xl:text-3xl">
               <h1 className="pb-10">Hello there!</h1>
               <p className="pb-4">
-                I'm Rachelle. Programmer, crocheter, and game lover.
+                I&apos;m Rachelle. Programmer, crocheter, and game lover.
               </p>
               <p className="pb-4">
                 Welcome to my showcase. Here you can find some of my favourite
@@ -224,7 +230,7 @@ export default function Home() {
                 trade cards.
               </p>
               <p className="pb-4">
-                I'm best reached through Email, LinkedIn, or Twitter.
+                I&apos;m best reached through Email, LinkedIn, or Twitter.
               </p>
               <p className="pb-4 text-base opacity-50 xl:text-lg 2xl:text-2xl">...Scroll for more →</p>
             </div>

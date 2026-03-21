@@ -65,9 +65,11 @@ const MainApp: AppType = ({
           />
           <meta name="twitter:image" content=" " />
           {/*<!-- Meta Tags Generated via https://www.opengraph.xyz -->*/}
-                  <Script type="module" src="https://cdn.jsdelivr.net/npm/hover-tilt/dist/hover-tilt.js"/>
-
         </Head>
+        {/* <Script
+          type="module"
+          src="https://cdn.jsdelivr.net/npm/hover-tilt/dist/hover-tilt.js"
+        /> */}
         <Component {...pageProps} />
       </div>
     </PostHogProvider>

@@ -191,6 +191,7 @@ const Photography: NextPage = () => {
   return (
     <div className="px-8 py-8 text-4xl md:text-6xl">
       <div className="px-2">
+        {/* eslint-disable-next-line */}
         <a
           href="/"
           className="inline-block pb-2 text-base md:pb-4 md:text-xl opacity-70 hover:opacity-100"
@@ -204,7 +205,7 @@ const Photography: NextPage = () => {
           I&apos;d rush to finish dinner to try and make it in time to catch the
           perfect sunset on my iPod. In this day and age, most people carry a
           miniture camera everywhere they go, myself included. For the first
-          time in human history it's possible to capture all the beautiful
+          time in human history it&apos;s possible to capture all the beautiful
           sights we see in our day to day. Here is a small collection of the
           precious views I&apos;ve had the luxury of seeing, and capturing.
         </div>
