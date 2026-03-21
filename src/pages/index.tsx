@@ -63,10 +63,7 @@ export default function Home() {
             <div className="">DE MAN</div>
           </div>
         </div>
-        <div
-          id="positions-mobile"
-          className="grid w-2/3 grid-cols-2 gap-1 pt-6 pl-4 pr-4 align-left"
-        >
+        <div className="grid w-2/3 grid-cols-2 gap-1 pt-6 pl-4 pr-4 align-left">
           <SocialLinkMobile
             link="https://github.com/demanr"
             title="Github"
@@ -104,6 +101,7 @@ export default function Home() {
             />
           ))}
         </div>
+        <div id="positions-mobile"></div>
       </div>
 
       <div className="hidden h-full md:block">
@@ -125,10 +123,7 @@ export default function Home() {
               />
               <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
             </div>
-            <div
-              id="positions-desktop"
-              className="h-9/10 min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl"
-            >
+            <div className="h-9/10 min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
               <h1 className="pb-10">Hello there!</h1>
               <p className="pb-4">TBA Long intro description</p>
               <p className="pb-4">
@@ -141,7 +136,9 @@ export default function Home() {
                 otherwise.
               </p>
               <p className="pb-4">
-                If you’re curious about anything I’ve done or want to chat about your work feel free to reach out! I’m always willing to trade cards.
+                If you’re curious about anything I’ve done or want to chat about
+                your work feel free to reach out! I’m always willing to trade
+                cards.
               </p>
               <p>I'm best reached through email, LinkedIn, or Twitter.</p>
             </div>
@@ -162,17 +159,8 @@ export default function Home() {
                   tags={card.tags}
                 />
               ))}
-              {/* <ProjectCard
-                title="Project Title"
-                tech={[{ name: "test", icon: "/githubLogo.svg" }]}
-                description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                imageUrl="/dash2.jpeg"
-                links={[
-                  { label: "GitHub", href: "https://github.com" },
-                  { label: "Live Demo", href: "https://example.com" },
-                ]}
-              /> */}
             </div>
+            <div id="positions-desktop"></div>
           </div>
         </div>
       </div>

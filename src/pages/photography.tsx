@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import React from "react";
 import Image, { StaticImageData } from "next/image";
+import Link from "next/link";
 import { useScreen } from "usehooks-ts";
 
 import img1 from "../../public/photography/IMG_0673 2.jpeg";
@@ -190,6 +191,9 @@ const Photography: NextPage = () => {
   return (
     <div className="px-8 py-8 font-serif text-6xl">
       <div className="px-2">
+        <a href="/" className="inline-block pb-4 text-xl opacity-70 hover:opacity-100">
+          ← Back
+        </a>
         <h1 className="">Photography</h1>
         {/* <hr className="max-w-2xl" /> */}
         <div className="w-full max-w-2xl pt-4 pb-8 text-xl opacity-60">
