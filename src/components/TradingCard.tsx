@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { Zen_Dots } from "next/font/google";
 import React, { useEffect, useState } from "react";
+import Script from "next/script";
 
 const zenDots = Zen_Dots({
   weight: "400",
@@ -48,7 +49,8 @@ interface TradingCardProps {
 	description: string;
 	imageUrl: string;
 	githubUrl?: string;
-	liveUrl?: string;
+  altUrl?: string;
+  altUrlLabel?: string;
 	tech?: { name: string; icon: string }[];
 	tags?: string[];
 }
@@ -58,7 +60,8 @@ export default function TradingCard({
 	description,
 	imageUrl,
 	githubUrl,
-	liveUrl,
+  altUrl,
+  altUrlLabel = "Live Demo",
 	tech = [],
 	tags = [],
 }: TradingCardProps) {
@@ -178,16 +181,16 @@ export default function TradingCard({
               GitHub
             </a>
           )}
-          {liveUrl && (
+          {altUrl && (
             <a
-              href={liveUrl}
+              href={altUrl}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1 px-5 py-2 pl-10 font-bold text-black transition-all bg-white hover:pr-8"
               style={{ clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0 100%)" }}
               draggable={false}
             >
-              Live Demo
+              {altUrlLabel}
             </a>
           )}
         </div>
