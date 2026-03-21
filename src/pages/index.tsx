@@ -10,6 +10,20 @@ import ProjectCard from "@/components/ProjectCard";
 //const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const tradingCards = Array.from({ length: 3 }, () => ({
+    name: "Dash",
+    description:
+      "Customizable dashboard that acts as a hub for frequently visited webpages. \n\n Built for HTN 2024.",
+    imageUrl: "/dash2.jpeg",
+    githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
+    liveUrl: "https://github.com/Krish120003/dash",
+    tech: [
+      { name: "GitHub", icon: "/githubLogo.svg" },
+      { name: "LinkedIn", icon: "/linkedinLogo.svg" },
+    ],
+    tags: ["Hackathon Project"],
+  }));
+
   const handleDesktopHorizontalWheel = (
     event: React.WheelEvent<HTMLDivElement>,
   ) => {
@@ -27,6 +41,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full min-h-screen md:h-screen">
       <Navbar />
+
       {/* Mobile Only */}
       <div className="w-full md:hidden">
         <div className="relative min-h-[120px] overflow-hidden">
@@ -64,27 +79,19 @@ export default function Home() {
             logo="/mailLogo.svg"
           />
         </div>
-        <div className="px-4 pt-8">
-          <TradingCard
-            name="Dash"
-            description="Customizable dashboard that acts as a hub for frequently visited webpages."
-            imageUrl="/dash2.jpeg"
-            githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
-            tech={[
-              { name: "GitHub", icon: "/githubLogo.svg" },
-              { name: "LinkedIn", icon: "/linkedinLogo.svg" },
-            ]}
-            tags={["Hackathon Project"]}
-          />
-          <ProjectCard
-            title="Project Title"
-            description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            imageUrl="/dash2.jpeg"
-            links={[
-              { label: "GitHub", href: "https://github.com" },
-              { label: "Live Demo", href: "https://example.com" },
-            ]}
-          />
+        <div className="flex flex-col gap-12 px-4 pt-8 mx-auto max-w-fit">
+          {tradingCards.map((card, index) => (
+            <TradingCard
+              key={`mobile-card-${index}`}
+              name={card.name}
+              description={card.description}
+              imageUrl={card.imageUrl}
+              githubUrl={card.githubUrl}
+              liveUrl={card.liveUrl}
+              tech={card.tech}
+              tags={card.tags}
+            />
+          ))}
         </div>
       </div>
 
@@ -93,7 +100,7 @@ export default function Home() {
           className="h-full overflow-x-auto "
           onWheel={handleDesktopHorizontalWheel}
         >
-          <div className="flex items-start h-full">
+          <div className="flex items-start h-full my-auto">
             <div className="relative h-[95%] min-w-[38vw]">
               <Image
                 src="/portrait.jpeg"
@@ -103,7 +110,7 @@ export default function Home() {
               />
               <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
             </div>
-            <div className="min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
+            <div className="h-9/10 min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
               <h1 className="pb-10">Hello there!</h1>
               <p className="pb-4">TBA Long intro description</p>
               <p className="pb-4">
@@ -122,40 +129,19 @@ export default function Home() {
               </p>
               <p>Yippee!</p>
             </div>
-            <div className="min-w-[26rem] px-10 pt-20 pb-10 flex gap-32 z-50">
-              <TradingCard
-                name="Dash"
-                description="Customizable dashboard that acts as a hub for frequently visited webpages."
-                imageUrl="/dash2.jpeg"
-                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
-                tech={[
-                  { name: "GitHub", icon: "/githubLogo.svg" },
-                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
-                ]}
-                tags={["Hackathon Project"]}
-              />
-              <TradingCard
-                name="Dash"
-                description="Customizable dashboard that acts as a hub for frequently visited webpages."
-                imageUrl="/dash2.jpeg"
-                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
-                tech={[
-                  { name: "GitHub", icon: "/githubLogo.svg" },
-                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
-                ]}
-                tags={["Hackathon Project"]}
-              />
-              <TradingCard
-                name="Dash"
-                description="Customizable dashboard that acts as a hub for frequently visited webpages."
-                imageUrl="/dash2.jpeg"
-                githubUrl="https://github.com/Krish120003/dash?tab=readme-ov-file"
-                tech={[
-                  { name: "GitHub", icon: "/githubLogo.svg" },
-                  { name: "LinkedIn", icon: "/linkedinLogo.svg" },
-                ]}
-                tags={["Hackathon Project"]}
-              />
+            <div className="min-w-[26rem] px-10 pt-10 pb-20 flex gap-32 z-50 my-auto">
+              {tradingCards.map((card, index) => (
+                <TradingCard
+                  key={`desktop-card-${index}`}
+                  name={card.name}
+                  description={card.description}
+                  imageUrl={card.imageUrl}
+                  githubUrl={card.githubUrl}
+                  liveUrl={card.liveUrl}
+                  tech={card.tech}
+                  tags={card.tags}
+                />
+              ))}
               {/* <ProjectCard
                 title="Project Title"
                 tech={[{ name: "test", icon: "/githubLogo.svg" }]}
@@ -170,7 +156,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-0 hidden bg-black md:block">
+      <div className="absolute bottom-0 hidden w-full bg-black md:block">
         <BottomBar />
       </div>
     </div>
