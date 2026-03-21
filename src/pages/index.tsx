@@ -149,9 +149,9 @@ export default function Home() {
         </div>
         <div className="px-8 pt-8 my-auto text-md font-mulish">
           <p className="pb-8">
-            I'm Rachelle. Programmer, crocheter, and game lover.
-            Here are a few of my favourite projects, both technical and otherwise.
-            I'm always open to chat, so feel free to reach out!
+            I'm Rachelle. Programmer, crocheter, and game lover. Here are a few
+            of my favourite projects, both technical and otherwise. I'm always
+            open to chat, so feel free to reach out!
           </p>
         </div>
         <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
@@ -215,7 +215,7 @@ export default function Home() {
                 I'm Rachelle. Programmer, crocheter, and game lover.
               </p>
               <p className="pb-4">
-                Welcome to my showcase. Displayed are some of my most meaningful
+                Welcome to my showcase. Here you can find some of my favourite
                 projects- both technical and otherwise.
               </p>
               <p className="pb-4">
@@ -226,10 +226,11 @@ export default function Home() {
               <p className="pb-4">
                 I'm best reached through Email, LinkedIn, or Twitter.
               </p>
+              <p className="pb-4 text-base opacity-50 xl:text-lg 2xl:text-2xl">...Scroll for more →</p>
             </div>
             <div
               id="projects-desktop"
-              className="min-w-[26rem] px-10 pt-10 pb-20 flex gap-32 my-auto flex-none z-50"
+              className="min-w-[26rem] pl-40 px-10 pt-10 pb-20 flex gap-32 my-auto flex-none z-50"
             >
               {tradingCards.map((card, index) => (
                 <TradingCard
