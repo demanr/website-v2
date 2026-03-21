@@ -21,7 +21,6 @@ import { IoHardwareChipOutline } from "react-icons/io5";
 
 import { RiRobot2Line } from "react-icons/ri";
 
-
 //const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -60,7 +59,7 @@ export default function Home() {
     {
       name: "Integrity",
       description:
-        "Tool to scan hackathon submissions and flag any foul play using AI and custom heuristics.",
+        "Tool to scan hackathon submissions and flag any foul play using heuristics and AI.\nIncludes similarity scanning across projects, suspicious commit detection, and contributor verification.",
       imageUrl: "/integrity.jpeg",
       githubUrl: "https://github.com/krish120003/integrity",
       //   altUrl: "https://devpost.com/software/tango-q37d4z",
@@ -166,7 +165,19 @@ export default function Home() {
             />
           ))}
         </div>
-        <div id="positions-mobile"></div>
+        <div
+          id="positions-mobile"
+          className="flex flex-col items-center px-4 pt-20 pb-16"
+        >
+          <Image
+            src="/minecraft_under_construction.png"
+            alt="Under construction"
+            width={700}
+            height={394}
+            className="w-48 h-auto max-w-md"
+            priority
+          />
+        </div>
       </div>
 
       <div className="hidden h-full md:block">
@@ -208,7 +219,7 @@ export default function Home() {
             </div>
             <div
               id="projects-desktop"
-              className="min-w-[26rem] px-10 pt-10 pb-20 flex gap-32 z-50 my-auto"
+              className="min-w-[26rem] px-10 pt-10 pb-20 flex gap-32 my-auto flex-none z-50"
             >
               {tradingCards.map((card, index) => (
                 <TradingCard
@@ -224,7 +235,19 @@ export default function Home() {
                 />
               ))}
             </div>
-            <div id="positions-desktop"></div>
+            <div
+              id="positions-desktop"
+              className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10"
+            >
+              <Image
+                src="/minecraft_under_construction.png"
+                alt="Under construction"
+                width={700}
+                height={394}
+                className="right-0 h-auto max-w-md w-60"
+                priority
+              />
+            </div>
           </div>
         </div>
       </div>
