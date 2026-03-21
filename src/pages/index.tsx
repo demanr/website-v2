@@ -6,24 +6,88 @@ import BottomBar from "@/components/BottomBar";
 import SocialLinkMobile from "@/components/SocialLinksMobile";
 import TradingCard from "@/components/TradingCard";
 import ProjectCard from "@/components/ProjectCard";
+import {
+  SiCplusplus,
+  SiNextdotjs,
+  SiPython,
+  SiReact,
+  SiTailwindcss,
+  SiTypescript,
+  SiGooglegemini,
+  SiOpencv,
+} from "react-icons/si";
+
+import { IoHardwareChipOutline } from "react-icons/io5";
+
+import { RiRobot2Line } from "react-icons/ri";
+
 
 //const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const tradingCards = Array.from({ length: 3 }, () => ({
-    name: "Dash",
-    description:
-      "Customizable dashboard that acts as a hub for frequently visited webpages. \n\n Built for HTN 2024.",
-    imageUrl: "/dash2.jpeg",
-    githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
-    altUrl: "https://github.com/Krish120003/dash",
-    altUrlLabel: "Project Link",
-    tech: [
-      { name: "GitHub", icon: "/githubLogo.svg" },
-      { name: "LinkedIn", icon: "/linkedinLogo.svg" },
-    ],
-    tags: ["Hackathon Project"],
-  }));
+  const tradingCards = [
+    {
+      name: "Tango",
+      description:
+        "Apple Intelligence if it was actually useful. A Voice activated AI helper that flows uses the clipboard to streamline responses.\nWinner of HTN 2025.",
+      imageUrl: "/tango.jpeg",
+      githubUrl: "https://github.com/demanr/tango",
+      altUrl: "https://devpost.com/software/tango-q37d4z",
+      altUrlLabel: "Devpost",
+      tech: [
+        { name: "Gemini", icon: SiGooglegemini },
+        { name: "TypeScript", icon: SiTypescript },
+        { name: "Tailwind CSS", icon: SiTailwindcss },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Bracket Bot",
+      description:
+        "Autonomous lane driving robot that navigates using OpenCV-based detection and centering.\nWinner at Bracket Bot hackathon. ",
+      imageUrl: "/bracketbot.png",
+      githubUrl: "https://github.com/Krish120003/lane-centering-bracketbot",
+      altUrl:
+        "https://github.com/Krish120003/lane-centering-bracketbot?tab=readme-ov-file#how",
+      altUrlLabel: "Video Demo",
+      tech: [
+        // { name: "Hardware", icon: RiRobot2Line },
+        { name: "OpenCV", icon: SiOpencv },
+        { name: "Python", icon: SiPython },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Integrity",
+      description:
+        "Tool to scan hackathon submissions and flag any foul play using AI and custom heuristics.",
+      imageUrl: "/integrity.jpeg",
+      githubUrl: "https://github.com/krish120003/integrity",
+      //   altUrl: "https://devpost.com/software/tango-q37d4z",
+      //   altUrlLabel: "Devpost",
+      tech: [
+        { name: "Gemini", icon: SiGooglegemini },
+        { name: "Python", icon: SiPython },
+      ],
+      tags: ["Hackathon"],
+    },
+    {
+      name: "Dash",
+      description:
+        "Customizable dashboard that acts as a hub for frequently visited webpages. \n\n Built for HTN 2024.",
+      imageUrl: "/dash2.jpeg",
+      githubUrl: "https://github.com/Krish120003/dash?tab=readme-ov-file",
+      altUrl: "https://github.com/Krish120003/dash",
+      altUrlLabel: "Project Link",
+      tech: [
+        { name: "React", icon: SiReact },
+        { name: "Next.js", icon: SiNextdotjs },
+        { name: "TypeScript", icon: SiTypescript },
+        { name: "Tailwind CSS", icon: SiTailwindcss },
+      ],
+      tags: ["Hackathon"],
+    },
+  ];
 
   const handleDesktopHorizontalWheel = (
     event: React.WheelEvent<HTMLDivElement>,
@@ -76,12 +140,13 @@ export default function Home() {
             name="r-deman"
             logo="/linkedinLogo.svg"
           />
-          <SocialLinkMobile
-            link="mailto:rachelledeman@icloud.com"
-            title="Email"
-            name="rachelledeman@icloud.com"
-            logo="/mailLogo.svg"
-          />
+          <a
+            className="flex items-center gap-2 font-bold text-white transition ease-in-out justify-left md:justify-center hover:scale-110"
+            href="/RachelleDeManResume.pdf"
+          >
+            <img className="w-4 h-4" src={"/resumeLogo.svg"} alt="resume" />
+            <p className="text-md">resume</p>
+          </a>
         </div>
         <div
           id="projects-mobile"
@@ -123,24 +188,23 @@ export default function Home() {
               />
               <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
             </div>
-            <div className="h-9/10 min-w-[32rem] px-10 pt-20 pb-10 text-lg lg:text-xl">
+            <div className=" min-w-[32rem] px-10 pb-10 my-auto lg:text-lg xl:text-2xl 2xl:text-3xl">
               <h1 className="pb-10">Hello there!</h1>
-              <p className="pb-4">TBA Long intro description</p>
               <p className="pb-4">
-                lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                I'm Rachelle. Programmer, crocheter, and game lover.
               </p>
               <p className="pb-4">
-                Welcome to my showcase. Here are displayed some of the projects
-                I’ve done that are meaningful to me- both technical and
-                otherwise.
+                Welcome to my showcase. Displayed are some of my most meaningful
+                projects- both technical and otherwise.
               </p>
               <p className="pb-4">
-                If you’re curious about anything I’ve done or want to chat about
-                your work feel free to reach out! I’m always willing to trade
-                cards.
+                If you’re curious about anything I’ve done (or want to chat
+                about your work) feel free to reach out! I’m always willing to
+                trade cards.
               </p>
-              <p>I'm best reached through email, LinkedIn, or Twitter.</p>
+              <p className="pb-4">
+                I'm best reached through Email, LinkedIn, or Twitter.
+              </p>
             </div>
             <div
               id="projects-desktop"

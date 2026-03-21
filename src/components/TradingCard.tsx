@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Zen_Dots } from "next/font/google";
 import React, { useEffect, useState } from "react";
 import Script from "next/script";
+import { IconType } from "react-icons";
 
 const zenDots = Zen_Dots({
   weight: "400",
@@ -51,7 +52,7 @@ interface TradingCardProps {
 	githubUrl?: string;
   altUrl?: string;
   altUrlLabel?: string;
-	tech?: { name: string; icon: string }[];
+  tech?: { name: string; icon: string | IconType }[];
 	tags?: string[];
 }
 
@@ -132,13 +133,17 @@ export default function TradingCard({
                     className="flex items-center justify-center w-10 h-10"
                     title={item.name}
                   >
-                    <Image
-                      src={item.icon}
-                      alt={item.name}
-                      width={64}
-                      height={64}
-                      className="object-contain w-6 h-6"
-                    />
+                    {typeof item.icon === "string" ? (
+                      <Image
+                        src={item.icon}
+                        alt={item.name}
+                        width={64}
+                        height={64}
+                        className="object-contain w-6 h-6"
+                      />
+                    ) : (
+                      item.icon({ className: "w-6 h-6" })
+                    )}
                   </span>
                 ))
               : tags.slice(0, 2).map((tag, index) => (

@@ -35,12 +35,6 @@ export default function BottomBar() {
                 name="r-deman"
                 logo="/linkedinLogo.svg"
               />
-              <SocialLink
-                link="mailto:rachelledeman@icloud.com"
-                title="Email"
-                name="rachelledeman@icloud.com"
-                logo="/mailLogo.svg"
-              />
             </div>
           </div>
         </div>

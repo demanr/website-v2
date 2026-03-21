@@ -1,8 +1,9 @@
 import Image from "next/image";
+import { IconType } from "react-icons";
 
 interface ProjectTech {
 	name: string;
-	icon: string;
+	icon: string | IconType;
 }
 
 interface ProjectLink {
@@ -43,13 +44,17 @@ export default function ProjectCard({
 								className="flex items-center justify-center rounded-md h-9 w-9 bg-zinc-900/90"
 								title={item.name}
 							>
-								<Image
-									src={item.icon}
-									alt={item.name}
-									width={20}
-									height={20}
-									className="object-contain w-5 h-5"
-								/>
+								{typeof item.icon === "string" ? (
+									<Image
+										src={item.icon}
+										alt={item.name}
+										width={20}
+										height={20}
+										className="object-contain w-5 h-5"
+									/>
+								) : (
+									item.icon({ className: "w-5 h-5" })
+								)}
 							</span>
 						))}
 					</div>

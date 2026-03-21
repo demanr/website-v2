@@ -105,9 +105,9 @@ export default function Navbar() {
 
   return (
     <nav className="pr-0 border-b border-gray-200 lg:pr-36 md:pr-12 w-fit">
-      <div className="px-4 mx-auto sm:px-6 lg:px-8">
+      <div className="px-4 mx-auto sm:px-6 lg:px-8 xl:px-12">
         <div className="flex items-center h-12 md:h-12">
-          <div className="flex space-x-4 text-base text-white transition md:space-x-8 md:text-lg lg:text-xl">
+          <div className="flex space-x-4 text-base text-white transition md:space-x-8 md:text-lg lg:text-xl xl:text-2xl xl:space-x-16">
             <button
               type="button"
               onClick={() => handleSectionClick('portfolio')}
