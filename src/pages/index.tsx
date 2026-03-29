@@ -15,6 +15,7 @@ import {
   SiTypescript,
   SiGooglegemini,
   SiOpencv,
+  SiX,
 } from "react-icons/si";
 
 import { IoHardwareChipOutline } from "react-icons/io5";
@@ -155,6 +156,14 @@ export default function Home() {
           />
           <a
             className="flex items-center gap-2 font-bold text-white transition ease-in-out justify-left md:justify-center hover:scale-110"
+            href="https://x.com/rachelledeman"
+          >
+            {/* @ts-expect-error TS5.0 */}
+            <SiX className="w-4 h-4" />
+            <p className="text-md">twitter</p>
+          </a>
+          <a
+            className="flex items-center gap-2 font-bold text-white transition ease-in-out justify-left md:justify-center hover:scale-110"
             href="/RachelleDeManResume.pdf"
           >
             <Image
@@ -169,9 +178,9 @@ export default function Home() {
         </div>
         <div className="px-8 pt-8 my-auto text-md font-mulish">
           <p className="pb-8">
-            I&apos;m Rachelle. Programmer, crocheter, and game lover. Here are a few
-            of my favourite projects, both technical and otherwise. I&apos;m always
-            open to chat, so feel free to reach out!
+            I&apos;m Rachelle. Programmer, crocheter, and game lover. Here are a
+            few of my favourite projects, both technical and otherwise. I&apos;m
+            always open to chat, so feel free to reach out!
           </p>
         </div>
         <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
@@ -246,7 +255,9 @@ export default function Home() {
               <p className="pb-4">
                 I&apos;m best reached through Email, LinkedIn, or Twitter.
               </p>
-              <p className="pb-4 text-base opacity-50 xl:text-lg 2xl:text-2xl">...Scroll for more →</p>
+              <p className="pb-4 text-base opacity-50 xl:text-lg 2xl:text-2xl">
+                ...Scroll for more →
+              </p>
             </div>
             <div
               id="projects-desktop"
