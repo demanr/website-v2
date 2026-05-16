@@ -1,8 +1,5 @@
 import { NextPage } from "next";
-import React from "react";
 import Image, { StaticImageData } from "next/image";
-import Link from "next/link";
-import { useScreen } from "usehooks-ts";
 
 import img1 from "../../public/photography/IMG_0673 2.jpeg";
 import img2 from "../../public/photography/IMG_0675 2.jpeg";
@@ -175,19 +172,13 @@ const CardCol: React.FC<CardColProps> = ({ imgs }) => {
   return (
     <div className="flex flex-col gap-4">
       {imgs.map((image) => (
-        <Card img={image} date="" key={img1.src} />
+        <Card img={image} date="" key={image.src} />
       ))}
     </div>
   );
 };
 
 const Photography: NextPage = () => {
-  const imgList = [
-    "/../../public/photography/testimg.jpeg",
-    "/../../public/photography/test2.jpeg",
-  ];
-  const screen = useScreen();
-
   return (
     <div className="px-8 py-8 text-4xl md:text-6xl">
       <div className="px-2">

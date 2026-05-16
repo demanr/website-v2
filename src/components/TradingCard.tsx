@@ -4,7 +4,6 @@
 import Image from "next/image";
 import { Zen_Dots } from "next/font/google";
 import React, { useEffect, useState } from "react";
-import Script from "next/script";
 import { IconType } from "react-icons";
 
 const zenDots = Zen_Dots({
@@ -39,9 +38,6 @@ interface HoverTiltProps extends React.DetailedHTMLProps<
     | "exclude"
     | "intersect"
     | undefined;
-  style?: React.CSSProperties;
-  class?: string;
-
   shadow?: boolean;
 }
 
@@ -74,6 +70,14 @@ export default function TradingCard({
 	}, []);
 
   useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent =
+      "hover-tilt::part(container) { border-radius: 1.5rem; touch-action: pan-y; }";
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
+
+  useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
     setIsBelowMd(mediaQuery.matches);
 
@@ -85,7 +89,7 @@ export default function TradingCard({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-	return (
+  return (
     <hover-tilt
       tilt-factor="0.4"
       scale-factor={isBelowMd ? 1.1 : 1.25}
@@ -94,30 +98,17 @@ export default function TradingCard({
       glare-intensity={0.6}
       glare-mask="url('/circular_texture.jpeg')"
       glare-mask-mode="luminance"
-      style={{ touchAction: "pan-y" }}
-      class="[touch-action:pan-y] [&::part(container)]:rounded-3xl [&::part(container)]:[touch-action:pan-y]"
     >
       <div
         className="-z-10 bg-slate-800 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 2xl:w-96 aspect-[3/5] rounded-xl border-4 border-white/60"
-        // version 1
         style={{
-          //   aspectRatio: "2 / 5",
           backgroundImage:
             "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), linear-gradient(rgba(26,26,26,.35), rgba(26,26,26,.35)), linear-gradient(rgba(26,26,26,.8), rgba(26,26,26,.8)), url('/CardTexture.jpg')",
           backgroundSize:
             "100% 100%, 100% 100%, 100% 100%, 100% 100%, 220px 220px",
           backgroundColor: "#1a1a1a",
+          touchAction: "pan-y",
         }}
-        //  version 2
-        // style={{
-        //   width: "320px",
-        //   backgroundImage:
-        //     "linear-gradient(rgba(10,14,20,.58), rgba(10,14,20,.58)), radial-gradient(circle at 25% 15%, rgba(120,170,210,.12), transparent 45%), url('/ice_texture.png')",
-        //   backgroundBlendMode: "multiply, soft-light, normal",
-        //   backgroundSize: "100% 100%, 100% 100%, 220px 220px",
-        //   backgroundPosition: "center, center, center",
-        //   backgroundColor: "#0f141b",
-        // }}
       >
         <div className="flex items-center justify-between p-3 pt-4 border-white/20">
           <h3
