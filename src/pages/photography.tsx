@@ -180,18 +180,18 @@ const CardCol: React.FC<CardColProps> = ({ imgs }) => {
 
 const Photography: NextPage = () => {
   return (
-    <div className="px-8 py-8 text-4xl md:text-6xl">
-      <div className="px-2">
+    <div className="px-8 text-4xl md:text-6xl">
+      <div className="px-2 pt-4 md:pt-0">
         {/* eslint-disable-next-line */}
         <a
           href="/"
-          className="inline-block pb-2 text-base md:pb-4 md:text-xl opacity-70 hover:opacity-100"
+          className="inline-block pb-2 text-lg md:pb-4 md:text-xl opacity-70 hover:opacity-100 "
         >
           ← Back
         </a>
-        <h1 className="">Photography</h1>
+        <h1 className="text-3xl md:text-4xl">/Photography</h1>
         {/* <hr className="max-w-2xl" /> */}
-        <div className="w-full max-w-2xl pt-4 pb-8 text-lg leading-5 md:leading-6 md:text-xl opacity-60">
+        <div className="w-full max-w-2xl pt-2 pb-8 text-lg leading-5 md:pt-4 md:leading-6 md:text-xl opacity-60">
           I&apos;ve always loved taking pictures of nature. When I was a kid,
           I&apos;d rush to finish dinner to try and make it in time to catch the
           perfect sunset on my iPod. In this day and age, most people carry a
@@ -202,7 +202,7 @@ const Photography: NextPage = () => {
         </div>
       </div>
       {/* <hr className="max-w-2xl pb-8" /> */}
-      <div className="grid w-full grid-cols-3 gap-2 p-8md:gap-4">
+      <div className="grid w-full grid-cols-3 gap-2 pt-4 p-8md:gap-4">
         <CardCol imgs={imgList1Desktop} />
         <div className="pt-16 md:pt-36">
           <CardCol imgs={imgList2Desktop} />
