@@ -74,7 +74,7 @@ export default function Home() {
     {
       name: "Integrity",
       description:
-        "Tool to scan hackathon submissions and flag any foul play using heuristics and AI.\nIncludes similarity scanning across projects, suspicious commit detection, and contributor verification.",
+        "Tool to flag foul play in hackathon submissions using heuristics and AI.\nIncludes similarity scanning across projects, suspicious commit detection, and contributor verification.",
       imageUrl: "/integrity.jpeg",
       githubUrl: "https://github.com/krish120003/integrity",
       //   altUrl: "https://devpost.com/software/tango-q37d4z",

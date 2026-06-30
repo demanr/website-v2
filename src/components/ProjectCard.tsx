@@ -71,7 +71,7 @@ export default function ProjectCard({
 						/>
 					) : (
 						<div className="flex items-center justify-center h-full text-sm text-zinc-300">
-							Project image
+							Project Image
 						</div>
 					)}
 				</div>
