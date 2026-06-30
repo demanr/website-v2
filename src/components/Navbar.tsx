@@ -113,28 +113,28 @@ export default function Navbar() {
               onClick={() => handleSectionClick('portfolio')}
               className={`md:w-20 text-left hover:font-bold ${activeSection === 'portfolio' ? 'font-bold' : ''}`}
             >
-              /Portfolio
+              /portfolio
             </button>
             <button
               type="button"
               onClick={() => handleSectionClick('projects')}
               className={`md:w-20 text-left hover:font-bold ${activeSection === 'projects' ? 'font-bold' : ''}`}
             >
-              /Projects
+              /projects
             </button>
             <button
               type="button"
               onClick={() => handleSectionClick('positions')}
               className={`md:w-20 text-left hover:font-bold ${activeSection === 'positions' ? 'font-bold' : ''}`}
             >
-              /Positions
+              /positions
             </button>
             <button
               type="button"
               onClick={() => handleSectionClick('photography')}
               className={`md:w-20 text-left hover:font-bold ${activeSection === 'photography' ? 'font-bold' : ''}`}
             >
-              /Photography
+              /photography
             </button>
           </div>
         </div>
