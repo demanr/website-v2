@@ -6,6 +6,7 @@ import BottomBar from "@/components/BottomBar";
 import SocialLinkMobile from "@/components/SocialLinksMobile";
 import TradingCard from "@/components/TradingCard";
 import ProjectCard from "@/components/ProjectCard";
+import Timeline from "@/components/Timeline";
 import {
   SiCplusplus,
   SiNextdotjs,
@@ -206,16 +207,9 @@ export default function Home() {
         </div>
         <div
           id="positions-mobile"
-          className="flex flex-col items-center px-4 pt-20 pb-32"
+          className="flex flex-col items-center pt-8 pb-32"
         >
-          <Image
-            src="/minecraft_under_construction.png"
-            alt="Under construction"
-            width={700}
-            height={394}
-            className="w-48 h-auto max-w-md"
-            priority
-          />
+          <Timeline variant="mobile" />
         </div>
       </div>
 
@@ -279,8 +273,11 @@ export default function Home() {
             </div>
             <div
               id="positions-desktop"
-              className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10"
+              className="relative z-10 flex-none px-16 my-auto"
             >
+              <Timeline />
+            </div>
+            <div className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10">
               <Image
                 src="/minecraft_under_construction.png"
                 alt="Under construction"
