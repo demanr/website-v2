@@ -12,8 +12,8 @@ const SHORT_DIAG = 64;
 const TALL_DIAG = 115;
 const DIAG_ANGLE_RAD = (67 * Math.PI) / 180;
 
-const BOAT_WIDTH = 197;
-const BOAT_HEIGHT = 60;
+const BOAT_WIDTH = 166;
+const BOAT_HEIGHT = 59;
 const BOAT_HULL_BOTTOM = 58;
 const BOAT_LEFT_PAD = 24;
 
@@ -25,9 +25,10 @@ const MOBILE_DIAG = 50;
 const MOBILE_DIAG_ANGLE_RAD = (25 * Math.PI) / 180;
 const MOBILE_SPACING_PER_MONTH = 12;
 
-const MAX_TILT_DEG = 10;
+const MAX_TILT_DEG = 15;
 const MAX_WAKE_SCALE = 1;
-const DECAY_DURATION_MS = 3000;
+const WAKE_LEN = 280;
+const WAKE_SPEED_THRESHOLD = 0.4;
 
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
 
@@ -48,8 +49,9 @@ function formatDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-const boatHullPath = 'M21.0283 57.5907C9.67017 57.5907 9.9695 30.6881 9.9695 30.6881H136.412C147.47 30.6881 143.883 2.88867 143.883 2.88867L170.489 30.6881H195C195 30.6881 184.837 56.1192 166.902 57.5907C148.967 59.0623 32.3865 57.5907 21.0283 57.5907Z';
-const boatCabinPath = 'M4.16481 14.248H22.0983C22.0983 14.248 23.649 14.2937 24.7885 14.547C29.9165 15.6865 25.388 27.6994 25.388 27.6994H4.16481C4.16481 27.6994 -2.95602 14.248 4.16481 14.248Z';
+
+const boatHullPath = 'M20.4002 57.358C9.71922 57.358 10.0007 30.6284 10.0007 30.6284H108.905C119.304 30.6284 115.931 3.00781 115.931 3.00781L140.95 30.6284H164C164 30.6284 154.443 55.8959 137.577 57.358C120.711 58.8201 31.0812 57.358 20.4002 57.358Z';
+const boatCabinPath = 'M4.16481 14.3672H22.0983C22.0983 14.3672 23.649 14.4129 24.7885 14.6661C29.9165 15.8057 25.388 27.8185 25.388 27.8185H4.16481C4.16481 27.8185 -2.95602 14.3672 4.16481 14.3672Z';
 
 function MobileTimeline() {
   const cumulativeMonths = useMemo(() => {
@@ -92,7 +94,7 @@ function MobileTimeline() {
   }, []);
 
   return (
-    <div className="w-full px-12 py-8">
+    <div className="w-full px-12 py-4">
       <svg width="100%" height={svgHeight} className="overflow-visible">
         <line
           x1={MOBILE_LINE_X}
@@ -153,6 +155,7 @@ function DesktopTimeline() {
   const velocityRef = useRef(0);
   const currentTiltRef = useRef(0);
   const currentWakeRef = useRef(0);
+  const peakWakeRef = useRef(0);
   const animFrameRef = useRef(0);
 
   useEffect(() => {
@@ -180,7 +183,7 @@ function DesktopTimeline() {
   const boatAndGapWidth = BOAT_LEFT_PAD + BOAT_WIDTH + gapWidth;
 
   const svgHeight = 380;
-  const lineY = 250;
+  const lineY = 220;
   const boatTop = lineY - BOAT_HULL_BOTTOM - 8;
 
   const handleScroll = useCallback(() => {
@@ -200,8 +203,11 @@ function DesktopTimeline() {
       const v = dScroll / dt;
       const SMOOTHING = 0.12;
       velocityRef.current = velocityRef.current + (v - velocityRef.current) * SMOOTHING;
-      currentTiltRef.current = -Math.min(velocityRef.current * 3, MAX_TILT_DEG);
-      currentWakeRef.current = Math.min(v, MAX_WAKE_SCALE);
+      const targetTilt = -Math.min(velocityRef.current * 6, MAX_TILT_DEG);
+      const targetWake = v > WAKE_SPEED_THRESHOLD ? Math.min(v, MAX_WAKE_SCALE) : 0;
+      const REEMERGE = 0.15;
+      currentTiltRef.current += (targetTilt - currentTiltRef.current) * REEMERGE;
+      currentWakeRef.current += (targetWake - currentWakeRef.current) * REEMERGE;
     }
 
     const svgXAtBoat = BOAT_LEFT_PAD - sectionRect.left;
@@ -222,7 +228,7 @@ function DesktopTimeline() {
   }, [handleScroll]);
 
   useEffect(() => {
-    const decayFactor = Math.pow(0.01, 1 / ((60 * DECAY_DURATION_MS) / 1000));
+    const DECAY_LERP = 0.07;
 
     const loop = () => {
       if (velocityRef.current > 0) {
@@ -230,11 +236,18 @@ function DesktopTimeline() {
         if (velocityRef.current < 0.001) velocityRef.current = 0;
       }
 
-      currentTiltRef.current *= decayFactor;
-      currentWakeRef.current *= decayFactor;
+      currentTiltRef.current += (0 - currentTiltRef.current) * DECAY_LERP;
+      currentWakeRef.current += (0 - currentWakeRef.current) * DECAY_LERP;
+
+      if (currentWakeRef.current > peakWakeRef.current) {
+        peakWakeRef.current = currentWakeRef.current;
+      }
 
       if (Math.abs(currentTiltRef.current) < 0.01) currentTiltRef.current = 0;
-      if (Math.abs(currentWakeRef.current) < 0.005) currentWakeRef.current = 0;
+      if (Math.abs(currentWakeRef.current) < 0.005) {
+        currentWakeRef.current = 0;
+        peakWakeRef.current = 0;
+      }
 
       setTiltAngle(currentTiltRef.current);
       setWakeScale(currentWakeRef.current);
@@ -363,7 +376,8 @@ function DesktopTimeline() {
           <svg
             width={BOAT_WIDTH}
             height={BOAT_HEIGHT}
-            viewBox="0 0 197 60"
+            viewBox="0 0 166 59"
+            className="overflow-visible"
             style={{
               position: 'absolute',
               top: boatTop,
@@ -373,44 +387,141 @@ function DesktopTimeline() {
             }}
           >
             <g>
-              {wakeScale > 0.01 && (
-                <>
-                  <line
-                    x1={8}
-                    y1={BOAT_HULL_BOTTOM - 10}
-                    x2={-80 * wakeScale}
-                    y2={BOAT_HULL_BOTTOM - 10}
-                    stroke="white"
-                    strokeWidth={1.5}
-                    opacity={0.4 * wakeScale}
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1={8}
-                    y1={BOAT_HULL_BOTTOM - 4}
-                    x2={-60 * wakeScale}
-                    y2={BOAT_HULL_BOTTOM - 4}
-                    stroke="white"
-                    strokeWidth={1}
-                    opacity={0.3 * wakeScale}
-                    strokeLinecap="round"
-                  />
-                  <line
-                    x1={12}
-                    y1={BOAT_HULL_BOTTOM + 3}
-                    x2={-40 * wakeScale}
-                    y2={BOAT_HULL_BOTTOM + 3}
-                    stroke="white"
-                    strokeWidth={1}
-                    opacity={0.2 * wakeScale}
-                    strokeLinecap="round"
-                  />
-                </>
-              )}
               <path d={boatHullPath} stroke="white" strokeWidth={2} fill="none" />
               <path d={boatCabinPath} stroke="white" strokeWidth={2} fill="none" />
             </g>
           </svg>
+
+          {wakeScale > 0.01 && (
+            <svg
+              className="overflow-visible"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+              }}
+            >
+              <defs>
+                <filter id="wake-blur" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="4" />
+                </filter>
+                <filter id="wake-blur-lg" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="7" />
+                </filter>
+              </defs>
+              {(() => {
+                const sternX = BOAT_LEFT_PAD + 164;
+                const waterlineY = boatTop + BOAT_HULL_BOTTOM - 10;
+                const len = WAKE_LEN * Math.max(wakeScale, peakWakeRef.current);
+                const dispY = wakeScale;
+                const sinkOffset = (1 - wakeScale) * 5;
+                const els: JSX.Element[] = [];
+                let k = 0;
+
+                // Layer 0: Bow wave — starts partway along hull, stretches into stern wake
+                const bowTipX = BOAT_LEFT_PAD + BOAT_WIDTH - 2;
+                const bowStartX = bowTipX - 30;
+                const totalBowLen = ((bowStartX - sternX) + len) * 1.5;
+                const bowCount = 40;
+                for (let i = 0; i < bowCount; i++) {
+                  const t = i / bowCount;
+                  const x = bowStartX - t * totalBowLen;
+                  const peakT = 0.08;
+                  const crestHeight = t < peakT
+                    ? (t / peakT) * 8
+                    : Math.pow(Math.max(0, 1 - (t - peakT) / (1 - peakT)), 1.4) * 8;
+                  const undulate = Math.sin(i * 1.5 + 0.6) * (1 + t * 2) * dispY;
+                  const y = waterlineY - crestHeight * dispY + undulate + sinkOffset;
+                  const fade = Math.pow(1 - t, 1.03);
+                  const r = 5 + Math.sin(i * 1.8) * 2 + (t < 0.3 ? (1 - t / 0.3) * 3 : 0);
+                  els.push(
+                    <circle key={k++} cx={x} cy={y} r={r}
+                      fill="white" opacity={fade * 0.35 * wakeScale}
+                      filter="url(#wake-blur)" />
+                  );
+                  if (i % 3 === 0) {
+                    els.push(
+                      <circle key={k++} cx={x - r * 0.3} cy={y + r * 0.5} r={r * 0.5}
+                        fill="white" opacity={fade * 0.59 * wakeScale}
+                        filter="url(#wake-blur)" />
+                    );
+                  }
+                }
+
+                // Layer 1: Dense foam churn right at the stern (scales with wakeScale)
+                // const churnSpread = 30 * wakeScale;
+                // for (let i = 0; i < 8; i++) {
+                //   const t = i / 8;
+                //   const x = sternX - t * churnSpread;
+                //   const y = waterlineY - 2 + Math.sin(i * 1.8) * 4;
+                //   const r = (6 + t * 8) * Math.max(0.4, wakeScale);
+                //   els.push(
+                //     <circle key={k++} cx={x} cy={y} r={r}
+                //       fill="white" opacity={0.25 * wakeScale * (1 - t * 0.5)}
+                //       filter="url(#wake-blur)" />
+                //   );
+                // }
+
+                // Layer 2: Rolling foam clouds that expand outward
+                const cloudCount = 14;
+                for (let i = 0; i < cloudCount; i++) {
+                  const t = i / cloudCount;
+                  const x = sternX - 15 - t * len;
+                  const fade = Math.pow(1 - t, 1.2);
+                  const spreadY = t * 12 * dispY;
+                  const y = waterlineY + Math.sin(i * 2.4 + 0.5) * spreadY + sinkOffset;
+                  const baseR = 5 + t * 12;
+                  const r = baseR + Math.sin(i * 1.9) * 6;
+                  els.push(
+                    <circle key={k++} cx={x} cy={y} r={r}
+                      fill="white" opacity={fade * 0.7 * wakeScale}
+                      filter="url(#wake-blur-lg)" />
+                  );
+                  if (i % 2 === 0) {
+                    els.push(
+                      <circle key={k++} cx={x + r * 0.4} cy={y - r * 0.3 * dispY} r={r * 0.6}
+                        fill="white" opacity={fade * 0.42 * wakeScale}
+                        filter="url(#wake-blur-lg)" />
+                    );
+                  }
+                }
+
+                // Layer 3: Upper splash droplets — small rising puffs
+                // for (let i = 0; i < 6; i++) {
+                //   const t = (i + 1) / 7;
+                //   const x = sternX - 10 - t * len * 0.5;
+                //   const y = waterlineY - 8 - Math.sin(i * 1.3) * (6 + t * 10);
+                //   const r = 3 + t * 5;
+                //   const fade = Math.pow(1 - t, 2);
+                //   els.push(
+                //     <circle key={k++} cx={x} cy={y} r={r}
+                //       fill="white" opacity={fade * 0.14 * wakeScale}
+                //       filter="url(#wake-blur)" />
+                //   );
+                // }
+
+                // Layer 4: Trailing thin foam line at waterline
+                // for (let i = 0; i < 10; i++) {
+                //   const t = (i + 1) / 10;
+                //   const x = sternX - 15 - t * len;
+                //   const y = waterlineY + Math.sin(i * 3.7) * 2;
+                //   const rx = 8 + t * 14;
+                //   const ry = 2 + t * 3;
+                //   const fade = Math.pow(1 - t, 1.8);
+                //   els.push(
+                //     <ellipse key={k++} cx={x} cy={y} rx={rx} ry={ry}
+                //       fill="white" opacity={fade * 0.1 * wakeScale}
+                //       filter="url(#wake-blur)" />
+                //   );
+                // }
+
+                return <g>{els}</g>;
+              })()}
+            </svg>
+          )}
         </div>
       </div>
     </div>

@@ -189,7 +189,7 @@ export default function Home() {
         </h2>
         <div
           id="projects-mobile"
-          className="flex flex-col gap-12 px-4 pt-12 mx-auto max-w-fit"
+          className="flex flex-col gap-12 px-4 py-12 mx-auto max-w-fit"
         >
           {tradingCards.map((card, index) => (
             <TradingCard
@@ -205,9 +205,12 @@ export default function Home() {
             />
           ))}
         </div>
+        <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
+          POSITIONS
+        </h2>
         <div
           id="positions-mobile"
-          className="flex flex-col items-center pt-8 pb-32"
+          className="flex flex-col items-center pb-32"
         >
           <Timeline variant="mobile" />
         </div>
