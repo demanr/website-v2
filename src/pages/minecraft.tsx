@@ -1,387 +1,355 @@
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import type { NextPage } from "next";
-import Navbar from "../components/Navbar";
+import Link from "next/link";
 
-type BlockType = "air" | "grass" | "dirt" | "stone" | "wood" | "leaves";
-
-const BLOCK_COLORS: Record<BlockType, string> = {
-  air: "transparent",
-  grass: "#5a8f3a",
-  dirt: "#7a5230",
-  stone: "#8a8a8a",
-  wood: "#8b5a2b",
-  leaves: "#3f7f2f",
-};
-
-const BLOCKS: BlockType[] = ["grass", "dirt", "stone", "wood", "leaves"];
-
-const TILE = 32;
-const WORLD_W = 120;
-const WORLD_H = 40;
-const GRAVITY = 0.6;
-const MOVE_SPEED = 4;
-const JUMP = 11;
-
-interface Player {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  w: number;
-  h: number;
-  onGround: boolean;
-}
+const WORLD_SIZE = 48;
+const TILE = 1;
 
 const MinecraftPage: NextPage = () => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const worldRef = useRef<BlockType[][]>([]);
-  const playerRef = useRef<Player>({
-    x: 60 * TILE,
-    y: 10 * TILE,
-    vx: 0,
-    vy: 0,
-    w: 24,
-    h: 48,
-    onGround: false,
-  });
-  const keysRef = useRef<Record<string, boolean>>({});
-  const cameraRef = useRef({ x: 0, y: 0 });
-  const selectedRef = useRef(0);
-  const mouseRef = useRef({ x: 0, y: 0, down: false, right: false });
-  const [selected, setSelected] = useState(0);
-  const [fps, setFps] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [activeStation, setActiveStation] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // generate world
-    const world: BlockType[][] = Array.from({ length: WORLD_H }, () =>
-      Array(WORLD_W).fill("air"),
-    );
-    const heights: number[] = [];
-    for (let x = 0; x < WORLD_W; x++) {
-      const h = Math.floor(
-        18 +
-          Math.sin(x * 0.15) * 3 +
-          Math.sin(x * 0.05) * 2 +
-          Math.cos(x * 0.3) * 1.5,
+    let cleanup: (() => void) | null = null;
+    let cancelled = false;
+    console.log("minecraft effect start");
+
+    (async () => {
+      console.log("minecraft async start");
+      const THREE = await import("three");
+      console.log("three imported", !!THREE);
+      if (cancelled) return;
+      const container = containerRef.current;
+      if (!container) return;
+
+      // Scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87ceeb);
+      scene.fog = new THREE.Fog(0x87ceeb, 40, 120);
+
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        200,
       );
-      heights.push(h);
-      for (let y = h; y < WORLD_H; y++) {
-        if (y === h) world[y][x] = "grass";
-        else if (y < h + 4) world[y][x] = "dirt";
-        else world[y][x] = "stone";
-      }
-      // trees
-      if (Math.random() < 0.08 && h > 8) {
-        const th = 3 + Math.floor(Math.random() * 3);
-        for (let t = 1; t <= th; t++) {
-          if (h - t >= 0) world[h - t][x] = "wood";
-        }
-        for (let ly = h - th - 2; ly <= h - th; ly++) {
-          for (let lx = x - 2; lx <= x + 2; lx++) {
-            if (
-              ly >= 0 &&
-              lx >= 0 &&
-              lx < WORLD_W &&
-              world[ly][lx] === "air"
-            ) {
-              world[ly][lx] = "leaves";
+      camera.position.set(0, 10, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Lights
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambient);
+      const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+      sun.position.set(50, 80, 30);
+      scene.add(sun);
+
+      // Terrain heightmap
+      const heightAt = (x: number, z: number) => {
+        return (
+          4 +
+          Math.floor(Math.sin(x * 0.25) * 2 + Math.cos(z * 0.2) * 2 + Math.sin((x + z) * 0.1) * 1.5)
+        );
+      };
+
+      // Build voxel terrain with instanced meshes per block type
+      const blockTypes = [
+        { name: "grass", color: 0x5a8f3a, yLevel: (h: number, y: number) => y === h },
+        { name: "dirt", color: 0x7a5230, yLevel: (h: number, y: number) => y < h && y >= h - 3 },
+        { name: "stone", color: 0x8a8a8a, yLevel: (h: number, y: number) => y < h - 3 },
+      ];
+
+      const instances: any[] = [];
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+      for (const bt of blockTypes) {
+        const material = new THREE.MeshLambertMaterial({ color: bt.color });
+        const matrices: any[] = [];
+        for (let x = -WORLD_SIZE / 2; x < WORLD_SIZE / 2; x++) {
+          for (let z = -WORLD_SIZE / 2; z < WORLD_SIZE / 2; z++) {
+            const h = heightAt(x, z);
+            for (let y = 0; y <= h; y++) {
+              if (!bt.yLevel(h, y)) continue;
+              const m = new THREE.Matrix4();
+              m.setPosition(x + 0.5, y + 0.5, z + 0.5);
+              matrices.push(m);
             }
           }
         }
+        const mesh = new THREE.InstancedMesh(geometry, material, matrices.length);
+        matrices.forEach((m, i) => mesh.setMatrixAt(i, m));
+        mesh.instanceMatrix.needsUpdate = true;
+        scene.add(mesh);
+        instances.push({ mesh, matrices });
       }
-    }
-    // bedrock-ish bottom
-    for (let x = 0; x < WORLD_W; x++) {
-      world[WORLD_H - 1][x] = "stone";
-    }
-    worldRef.current = world;
 
-    // place player above surface
-    const sx = 60;
-    const sy = heights[sx] - 4;
-    playerRef.current.x = sx * TILE;
-    playerRef.current.y = sy * TILE;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let raf = 0;
-    let last = performance.now();
-    let accFps = 0;
-    let frames = 0;
-
-    const isSolid = (bx: number, by: number) => {
-      if (bx < 0 || by < 0 || bx >= WORLD_W || by >= WORLD_H) return true;
-      return worldRef.current[by][bx] !== "air";
-    };
-
-    const update = (dt: number) => {
-      const p = playerRef.current;
-      const keys = keysRef.current;
-      // input
-      let move = 0;
-      if (keys["a"] || keys["ArrowLeft"]) move -= 1;
-      if (keys["d"] || keys["ArrowRight"]) move += 1;
-      p.vx = move * MOVE_SPEED;
-      if ((keys[" "] || keys["w"] || keys["ArrowUp"]) && p.onGround) {
-        p.vy = -JUMP;
-        p.onGround = false;
+      // Trees (simple)
+      const trunkGeo = new THREE.BoxGeometry(0.6, 4, 0.6);
+      const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8b5a2b });
+      const leavesGeo = new THREE.BoxGeometry(3, 2, 3);
+      const leavesMat = new THREE.MeshLambertMaterial({ color: 0x3f7f2f });
+      for (let i = 0; i < 40; i++) {
+        const x = Math.floor(Math.random() * WORLD_SIZE) - WORLD_SIZE / 2;
+        const z = Math.floor(Math.random() * WORLD_SIZE) - WORLD_SIZE / 2;
+        const h = heightAt(x, z);
+        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+        trunk.position.set(x + 0.5, h + 2, z + 0.5);
+        scene.add(trunk);
+        const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+        leaves.position.set(x + 0.5, h + 4.5, z + 0.5);
+        scene.add(leaves);
       }
-      // gravity
-      p.vy += GRAVITY;
-      if (p.vy > 20) p.vy = 20;
 
-      // horizontal collision
-      p.x += p.vx;
-      let left = Math.floor(p.x / TILE);
-      let right = Math.floor((p.x + p.w - 1) / TILE);
-      let top = Math.floor(p.y / TILE);
-      let bottom = Math.floor((p.y + p.h - 1) / TILE);
-      if (p.vx > 0) {
-        if (isSolid(right, top) || isSolid(right, bottom)) {
-          p.x = right * TILE - p.w;
-          p.vx = 0;
+      // Stations (portfolio content markers)
+      const stationDefs: { id: string; title: string; pos: [number, number, number]; color: number }[] = [
+        { id: "about", title: "About", pos: [6, 0, 6], color: 0xffd700 },
+        { id: "projects", title: "Projects", pos: [-8, 0, 4], color: 0x42a5f5 },
+        { id: "photography", title: "Photography", pos: [4, 0, -10], color: 0xab47bc },
+        { id: "contact", title: "Contact", pos: [-6, 0, -8], color: 0x66bb6a },
+      ];
+
+      const stations: { id: string; title: string; position: any }[] = [];
+      for (const s of stationDefs) {
+        const h = heightAt(s.pos[0], s.pos[2]);
+        const pos = new THREE.Vector3(s.pos[0] + 0.5, h + 1.5, s.pos[2] + 0.5);
+        const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        const mat = new THREE.MeshLambertMaterial({ color: s.color, emissive: s.color, emissiveIntensity: 0.4 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(pos);
+        scene.add(mesh);
+        // floating label via sprite? skip; HTML handles
+        stations.push({ id: s.id, title: s.title, position: pos });
+      }
+
+      // Player state
+      const player = {
+        position: new THREE.Vector3(0, heightAt(0, 0) + 2, 0),
+        velocity: new THREE.Vector3(0, 0, 0),
+        yaw: 0,
+        pitch: 0,
+        onGround: false,
+      };
+      camera.position.copy(player.position);
+
+      const keys = new Set<string>();
+      const onKeyDown = (e: KeyboardEvent) => keys.add(e.code);
+      const onKeyUp = (e: KeyboardEvent) => keys.delete(e.code);
+      window.addEventListener("keydown", onKeyDown);
+      window.addEventListener("keyup", onKeyUp);
+
+      // Pointer lock
+      const onPointerLockChange = () => {
+        setLocked(document.pointerLockElement === renderer.domElement);
+      };
+      document.addEventListener("pointerlockchange", onPointerLockChange);
+      const onMouseMove = (e: MouseEvent) => {
+        if (document.pointerLockElement !== renderer.domElement) return;
+        player.yaw -= e.movementX * 0.002;
+        player.pitch -= e.movementY * 0.002;
+        player.pitch = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, player.pitch));
+      };
+      document.addEventListener("mousemove", onMouseMove);
+      renderer.domElement.addEventListener("click", () => {
+        if (document.pointerLockElement !== renderer.domElement) {
+          renderer.domElement.requestPointerLock();
         }
-      } else if (p.vx < 0) {
-        if (isSolid(left, top) || isSolid(left, bottom)) {
-          p.x = (left + 1) * TILE;
-          p.vx = 0;
+      });
+
+      const EYE = 1.7;
+      const SPEED = 6;
+      const JUMP = 7;
+      const GRAVITY = 18;
+
+      let last = performance.now();
+      let raf = 0;
+      const tmpForward = new THREE.Vector3();
+      const tmpRight = new THREE.Vector3();
+
+      const animate = (now: number) => {
+        const dt = Math.min((now - last) / 1000, 0.1);
+        last = now;
+
+        // input direction
+        const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+        // note: camera looks along -Z in local space; adjust
+        const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+
+        const move = new THREE.Vector3(0, 0, 0);
+        if (keys.has("KeyW")) move.add(forward);
+        if (keys.has("KeyS")) move.sub(forward);
+        if (keys.has("KeyA")) move.sub(right);
+        if (keys.has("KeyD")) move.add(right);
+        if (move.lengthSq() > 0) move.normalize().multiplyScalar(SPEED * dt);
+
+        player.position.x += move.x;
+        player.position.z += move.z;
+
+        // world bounds
+        const half = WORLD_SIZE / 2 - 1;
+        player.position.x = Math.max(-half, Math.min(half, player.position.x));
+        player.position.z = Math.max(-half, Math.min(half, player.position.z));
+
+        // gravity / jump
+        if (keys.has("Space") && player.onGround) {
+          player.velocity.y = JUMP;
+          player.onGround = false;
         }
-      }
+        player.velocity.y -= GRAVITY * dt;
+        player.position.y += player.velocity.y * dt;
 
-      // vertical collision
-      p.y += p.vy;
-      left = Math.floor(p.x / TILE);
-      right = Math.floor((p.x + p.w - 1) / TILE);
-      top = Math.floor(p.y / TILE);
-      bottom = Math.floor((p.y + p.h - 1) / TILE);
-      p.onGround = false;
-      if (p.vy > 0) {
-        if (isSolid(left, bottom) || isSolid(right, bottom)) {
-          p.y = bottom * TILE - p.h;
-          p.vy = 0;
-          p.onGround = true;
+        const groundH = heightAt(Math.floor(player.position.x), Math.floor(player.position.z)) + EYE;
+        if (player.position.y <= groundH) {
+          player.position.y = groundH;
+          player.velocity.y = 0;
+          player.onGround = true;
         }
-      } else if (p.vy < 0) {
-        if (isSolid(left, top) || isSolid(right, top)) {
-          p.y = (top + 1) * TILE;
-          p.vy = 0;
-        }
-      }
 
-      // world bounds
-      if (p.x < 0) p.x = 0;
-      if (p.x > (WORLD_W - 1) * TILE) p.x = (WORLD_W - 1) * TILE;
-      if (p.y > (WORLD_H - 1) * TILE) {
-        // respawn
-        p.x = 60 * TILE;
-        p.y = 10 * TILE;
-        p.vx = 0;
-        p.vy = 0;
-      }
+        // camera rotation
+        camera.position.copy(player.position);
+        const lookTarget = new THREE.Vector3(
+          player.position.x + Math.sin(player.yaw) * Math.cos(player.pitch),
+          player.position.y + Math.sin(player.pitch),
+          player.position.z + Math.cos(player.yaw) * Math.cos(player.pitch),
+        );
+        camera.lookAt(lookTarget);
 
-      // camera
-      const cam = cameraRef.current;
-      const targetCamX = p.x - canvas.width / 2 + p.w / 2;
-      cam.x += (targetCamX - cam.x) * 0.1;
-      if (cam.x < 0) cam.x = 0;
-      if (cam.x > WORLD_W * TILE - canvas.width) cam.x = WORLD_W * TILE - canvas.width;
-      const targetCamY = p.y - canvas.height / 2 + p.h / 2;
-      cam.y += (targetCamY - cam.y) * 0.1;
-      if (cam.y < 0) cam.y = 0;
-      if (cam.y > WORLD_H * TILE - canvas.height) cam.y = WORLD_H * TILE - canvas.height;
-    };
-
-    const render = () => {
-      const world = worldRef.current;
-      const p = playerRef.current;
-      const cam = cameraRef.current;
-      ctx.fillStyle = "#87ceeb";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // sun
-      ctx.fillStyle = "#fff7a8";
-      ctx.beginPath();
-      ctx.arc(canvas.width - 80, 60, 30, 0, Math.PI * 2);
-      ctx.fill();
-
-      const startCol = Math.floor(cam.x / TILE);
-      const endCol = Math.ceil((cam.x + canvas.width) / TILE);
-      const startRow = Math.floor(cam.y / TILE);
-      const endRow = Math.ceil((cam.y + canvas.height) / TILE);
-
-      for (let y = startRow; y <= endRow; y++) {
-        if (y < 0 || y >= WORLD_H) continue;
-        for (let x = startCol; x <= endCol; x++) {
-          if (x < 0 || x >= WORLD_W) continue;
-          const b = world[y][x];
-          if (b === "air") continue;
-          ctx.fillStyle = BLOCK_COLORS[b];
-          ctx.fillRect(
-            x * TILE - cam.x,
-            y * TILE - cam.y,
-            TILE,
-            TILE,
-          );
-          // outline
-          ctx.strokeStyle = "rgba(0,0,0,0.15)";
-          ctx.strokeRect(x * TILE - cam.x, y * TILE - cam.y, TILE, TILE);
-          // grass top highlight
-          if (b === "grass") {
-            ctx.fillStyle = "#7cb342";
-            ctx.fillRect(x * TILE - cam.x, y * TILE - cam.y, TILE, 6);
+        // station proximity
+        let nearest: string | null = null;
+        let nearestDist = 4;
+        for (const s of stations) {
+          const d = Math.hypot(s.position.x - player.position.x, s.position.z - player.position.z);
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearest = s.id;
           }
         }
-      }
+        setActiveStation(nearest);
 
-      // player
-      ctx.fillStyle = "#e53935";
-      ctx.fillRect(p.x - cam.x, p.y - cam.y, p.w, p.h);
-      ctx.fillStyle = "#ffcc80";
-      ctx.fillRect(p.x - cam.x + 4, p.y - cam.y + 4, p.w - 8, 12);
-      // eyes
-      ctx.fillStyle = "#000";
-      ctx.fillRect(p.x - cam.x + 6, p.y - cam.y + 8, 3, 3);
-      ctx.fillRect(p.x - cam.x + 15, p.y - cam.y + 8, 3, 3);
+        renderer.render(scene, camera);
+        raf = requestAnimationFrame(animate);
+      };
+      raf = requestAnimationFrame(animate);
 
-      // highlight hovered block
-      const mx = mouseRef.current.x + cam.x;
-      const my = mouseRef.current.y + cam.y;
-      const hbX = Math.floor(mx / TILE);
-      const hbY = Math.floor(my / TILE);
-      if (hbX >= 0 && hbY >= 0 && hbX < WORLD_W && hbY < WORLD_H) {
-        ctx.strokeStyle = "rgba(255,255,255,0.8)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(hbX * TILE - cam.x, hbY * TILE - cam.y, TILE, TILE);
-        ctx.lineWidth = 1;
-      }
+      const onResize = () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      };
+      window.addEventListener("resize", onResize);
 
-      // hotbar
-      const hbY0 = canvas.height - 48;
-      for (let i = 0; i < BLOCKS.length; i++) {
-        const bx = canvas.width / 2 - (BLOCKS.length * 40) / 2 + i * 40;
-        ctx.fillStyle = i === selectedRef.current ? "#fff" : "rgba(0,0,0,0.5)";
-        ctx.fillRect(bx, hbY0, 36, 36);
-        ctx.fillStyle = BLOCK_COLORS[BLOCKS[i]];
-        ctx.fillRect(bx + 4, hbY0 + 4, 28, 28);
-        ctx.fillStyle = "#000";
-        ctx.font = "12px monospace";
-        ctx.fillText(String(i + 1), bx + 2, hbY0 - 2);
-      }
+      cleanup = () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("keydown", onKeyDown);
+        window.removeEventListener("keyup", onKeyUp);
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("pointerlockchange", onPointerLockChange);
+        document.removeEventListener("mousemove", onMouseMove);
+        renderer.dispose();
+        if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      };
 
-      // instructions
-      ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(8, 8, 360, 60);
-      ctx.fillStyle = "#fff";
-      ctx.font = "12px monospace";
-      ctx.fillText("A/D move  Space jump  1-5 select block", 16, 26);
-      ctx.fillText("Left click break  Right click place", 16, 44);
-      ctx.fillText(`Selected: ${BLOCKS[selectedRef.current]}`, 16, 62);
-    };
-
-    const handleMouse = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      mouseRef.current.x = (e.clientX - rect.left) * scaleX;
-      mouseRef.current.y = (e.clientY - rect.top) * scaleY;
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      e.preventDefault();
-      const cam = cameraRef.current;
-      const mx = mouseRef.current.x + cam.x;
-      const my = mouseRef.current.y + cam.y;
-      const bx = Math.floor(mx / TILE);
-      const by = Math.floor(my / TILE);
-      if (bx < 0 || by < 0 || bx >= WORLD_W || by >= WORLD_H) return;
-      if (e.button === 0) {
-        // break
-        worldRef.current[by][bx] = "air";
-      } else if (e.button === 2) {
-        // place if not overlapping player
-        const p = playerRef.current;
-        const blockLeft = bx * TILE;
-        const blockRight = blockLeft + TILE;
-        const blockTop = by * TILE;
-        const blockBottom = blockTop + TILE;
-        const overlap =
-          p.x < blockRight &&
-          p.x + p.w > blockLeft &&
-          p.y < blockBottom &&
-          p.y + p.h > blockTop;
-        if (!overlap && worldRef.current[by][bx] === "air") {
-          worldRef.current[by][bx] = BLOCKS[selectedRef.current];
-        }
-      }
-    };
-
-    const handleContext = (e: MouseEvent) => e.preventDefault();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      keysRef.current[e.key] = true;
-      if (e.key >= "1" && e.key <= "5") {
-        const idx = parseInt(e.key) - 1;
-        selectedRef.current = idx;
-        setSelected(idx);
-      }
-      if (e.key === " " || e.key.startsWith("Arrow")) e.preventDefault();
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      keysRef.current[e.key] = false;
-    };
-
-    const resize = () => {
-      const parent = canvas.parentElement;
-      canvas.width = parent ? parent.clientWidth : window.innerWidth;
-      canvas.height = parent ? parent.clientHeight : window.innerHeight - 48;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    canvas.addEventListener("mousemove", handleMouse);
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("contextmenu", handleContext);
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    const loop = (now: number) => {
-      const dt = now - last;
-      last = now;
-      frames++;
-      accFps += dt;
-      if (accFps >= 1000) {
-        setFps(Math.round((frames * 1000) / accFps));
-        frames = 0;
-        accFps = 0;
-      }
-      update(dt / 16.67);
-      render();
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
+      setReady(true);
+    })().catch((err) => {
+      console.error("3D world failed to load", err);
+      setError(String(err?.message ?? err));
+    });
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-      canvas.removeEventListener("mousemove", handleMouse);
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("contextmenu", handleContext);
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      cancelled = true;
+      if (cleanup) cleanup();
     };
   }, []);
 
-  return (
-    <div className="w-full h-screen bg-black overflow-hidden">
-      <Navbar />
-      <div className="relative w-full" style={{ height: "calc(100vh - 48px)" }}>
-        <canvas ref={canvasRef} className="block w-full h-full" />
-        <div className="absolute top-2 right-2 text-white text-xs font-mono bg-black/50 px-2 py-1 rounded">
-          FPS {fps}
-        </div>
+  const stationContent: Record<string, ReactNode> = {
+    about: (
+      <div>
+        <p className="mb-2">
+          I&apos;m Rachelle. Programmer, crocheter, and game lover. Welcome to
+          my 3D voxel portfolio.
+        </p>
+        <p>Use WASD to walk and mouse to look around. Approach the glowing blocks.</p>
       </div>
+    ),
+    projects: (
+      <div className="space-y-2">
+        <a className="block text-blue-300 hover:underline" href="https://github.com/demanr/tango" target="_blank" rel="noreferrer">
+          Tango — voice-activated AI helper (Hack the North 2025)
+        </a>
+        <a className="block text-blue-300 hover:underline" href="https://github.com/Krish120003/lane-centering-bracketbot" target="_blank" rel="noreferrer">
+          Bracket Bot — autonomous lane driving robot
+        </a>
+        <a className="block text-blue-300 hover:underline" href="https://github.com/deltahacks" target="_blank" rel="noreferrer">
+          DeltaHacks — McMaster hackathon platform
+        </a>
+        <a className="block text-blue-300 hover:underline" href="https://github.com/krish120003/integrity" target="_blank" rel="noreferrer">
+          Integrity — hackathon submission checker
+        </a>
+      </div>
+    ),
+    photography: (
+      <div>
+        <p className="mb-2">A selection of my photography.</p>
+        <Link href="/photography" className="text-blue-300 hover:underline">
+          Open photography gallery →
+        </Link>
+      </div>
+    ),
+    contact: (
+      <div className="space-y-2">
+        <a className="block text-blue-300 hover:underline" href="mailto:rachelledeman@icloud.com">
+          rachelledeman@icloud.com
+        </a>
+        <a className="block text-blue-300 hover:underline" href="https://github.com/demanr" target="_blank" rel="noreferrer">
+          GitHub
+        </a>
+        <a className="block text-blue-300 hover:underline" href="https://www.linkedin.com/in/r-deman/" target="_blank" rel="noreferrer">
+          LinkedIn
+        </a>
+      </div>
+    ),
+  };
+
+  const stationTitle: Record<string, string> = {
+    about: "About",
+    projects: "Projects",
+    photography: "Photography",
+    contact: "Contact",
+  };
+
+  return (
+    <div className="relative w-full h-screen bg-black overflow-hidden">
+      <div ref={containerRef} className="absolute inset-0" />
+      {!ready && !error && (
+        <div className="absolute inset-0 flex items-center justify-center text-white font-mono">
+          Loading 3D world…
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center text-red-400 font-mono p-4 text-center">
+          Failed to load 3D world: {error}
+        </div>
+      )}
+      <div className="absolute top-4 left-4 text-white text-sm font-mono bg-black/60 px-3 py-2 rounded z-10">
+        <div className="font-bold">Minecraft Portfolio (3D)</div>
+        <div className="opacity-70">Click to look · WASD move · Space jump</div>
+        <div className="opacity-70">{locked ? "Pointer locked" : "Click canvas to lock pointer"}</div>
+        <Link href="/" className="text-blue-300 hover:underline block mt-1">
+          ← Back to 2D portfolio
+        </Link>
+      </div>
+      {activeStation && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-xl bg-black/80 text-white p-4 rounded-lg z-10 border border-white/20">
+          <div className="font-bold mb-2">{stationTitle[activeStation]}</div>
+          {stationContent[activeStation]}
+        </div>
+      )}
     </div>
   );
 };
