@@ -100,19 +100,18 @@ export default function TradingCard({
       glare-mask-mode="luminance"
     >
       <div
-        className="-z-10 bg-slate-800 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 2xl:w-96 aspect-[3/5] rounded-xl border-4 border-white/60"
+        className="-z-10 relative overflow-hidden transition-all duration-300 shadow-2xl w-80 2xl:w-96 aspect-[3/5] mc-block"
         style={{
           backgroundImage:
-            "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,.18) 3px, rgba(0,0,0,.18) 6px), linear-gradient(rgba(26,26,26,.35), rgba(26,26,26,.35)), linear-gradient(rgba(26,26,26,.8), rgba(26,26,26,.8)), url('/CardTexture.jpg')",
-          backgroundSize:
-            "100% 100%, 100% 100%, 100% 100%, 100% 100%, 220px 220px",
-          backgroundColor: "#1a1a1a",
+            "linear-gradient(180deg, #5a8f3a 0 12%, #7a5230 12% 32%, #3a3a3a 32% 100%)",
+          backgroundColor: "#3a3a3a",
           touchAction: "pan-y",
+          imageRendering: "pixelated",
         }}
       >
         <div className="flex items-center justify-between p-3 pt-4 border-white/20">
           <h3
-            className={`${zenDots.className} text-xl xl:text-2xl 2xl:text-3xl font-bold tracking-wide text-white`}
+            className="mc-font text-sm xl:text-base 2xl:text-lg font-bold tracking-wide text-white drop-shadow-[2px_2px_0_#000]"
           >
             {name}
           </h3>
@@ -121,7 +120,7 @@ export default function TradingCard({
               ? tech.slice(0, 4).map((item) => (
                   <span
                     key={item.name}
-                    className="flex items-center justify-center w-10 h-10"
+                    className="mc-slot flex items-center justify-center w-10 h-10"
                     title={item.name}
                   >
                     {typeof item.icon === "string" ? (
@@ -148,8 +147,7 @@ export default function TradingCard({
           </div>
         </div>
 
-        <div className="relative mx-3 overflow-hidden border border-b-8 rounded-md h-[188px] xl:h-48 2xl:h-56 border-white/40 ">
-          <Image
+        <div className="relative mx-3 overflow-hidden mc-block h-[188px] xl:h-48 2xl:h-56 bg-stone-700 ">          <Image
             src={imageUrl}
             alt={name}
             fill
@@ -170,7 +168,7 @@ export default function TradingCard({
               href={githubUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1 px-5 py-2 pr-10 font-bold text-black transition-all -translate-y-10 bg-white hover:pl-8"
+              className="mc-button mc-font flex items-center gap-1 px-4 py-2 text-xs font-bold text-black transition-all -translate-y-10 hover:pl-8"
               style={{ clipPath: "polygon(0 0, 100% 0, 82% 100%, 0 100%)" }}
               draggable={false}
             >
@@ -182,7 +180,7 @@ export default function TradingCard({
               href={altUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1 px-5 py-2 pl-10 font-bold text-black transition-all bg-white hover:pr-8"
+              className="mc-button mc-font flex items-center gap-1 px-4 py-2 text-xs font-bold text-black transition-all hover:pr-8"
               style={{ clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0 100%)" }}
               draggable={false}
             >

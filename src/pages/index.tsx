@@ -137,8 +137,8 @@ export default function Home() {
             <div className="absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-black to-transparent backdrop-blur-[1px]" />
           </div>
           <div className="relative z-10 flex flex-col items-start px-4 py-8 text-5xl">
-            <div className="">RACHELLE </div>
-            <div className="">DE MAN</div>
+            <div className="mc-font text-4xl drop-shadow-[3px_3px_0_#000]">RACHELLE </div>
+            <div className="mc-font text-4xl drop-shadow-[3px_3px_0_#000]">DE MAN</div>
           </div>
         </div>
         <div className="grid w-2/3 grid-cols-2 gap-1 pt-6 pl-4 pr-4 align-left">
@@ -183,7 +183,7 @@ export default function Home() {
             always open to chat, so feel free to reach out!
           </p>
         </div>
-        <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
+        <h2 className="mc-font p-2 pr-10 text-xl border-b-4 border-white w-fit">
           PROJECTS
         </h2>
         <div
@@ -239,7 +239,7 @@ export default function Home() {
               <div className="absolute inset-y-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-black/80 to-transparent backdrop-blur-[1px]" />
             </div>
             <div className=" min-w-[32rem] px-10 pb-10 my-auto lg:text-lg xl:text-2xl 2xl:text-3xl">
-              <h1 className="pb-10">Hello there!</h1>
+              <h1 className="mc-font pb-10 drop-shadow-[3px_3px_0_#000]">Hello there!</h1>
               <p className="pb-4">
                 I&apos;m Rachelle. Programmer, crocheter, and game lover.
               </p>

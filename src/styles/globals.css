@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -20,5 +21,42 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background:#0C0D14;
+  background-color: #1a1a1a;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 4px),
+    linear-gradient(180deg, #5a8f3a 0 14%, #7a5230 14% 100%);
+  background-size: 4px 4px, 4px 4px, 100% 100%;
+  image-rendering: pixelated;
+}
+
+.mc-font {
+  font-family: "Press Start 2P", monospace;
+  letter-spacing: 0;
+}
+
+.mc-block {
+  border: 4px solid #1a1a1a;
+  box-shadow:
+    inset -4px -4px 0 0 rgba(0,0,0,0.35),
+    inset 4px 4px 0 0 rgba(255,255,255,0.18);
+  image-rendering: pixelated;
+}
+
+.mc-button {
+  background: linear-gradient(180deg, #c6c6c6 0%, #8b8b8b 100%);
+  border: 3px solid #373737;
+  color: #1a1a1a;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+  box-shadow: inset -2px -2px 0 0 rgba(0,0,0,0.3), inset 2px 2px 0 0 rgba(255,255,255,0.5);
+}
+
+.mc-button:hover {
+  background: linear-gradient(180deg, #d9d9d9 0%, #9a9a9a 100%);
+}
+
+.mc-slot {
+  background: #8b8b8b;
+  border: 2px solid #373737;
+  box-shadow: inset -2px -2px 0 0 rgba(0,0,0,0.35), inset 2px 2px 0 0 rgba(255,255,255,0.25);
 }
