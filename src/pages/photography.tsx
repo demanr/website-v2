@@ -150,9 +150,7 @@ const Card: React.FC<CardProps> = ({ img, date }) => {
         alt=""
         placeholder="blur"
         loading="lazy"
-        sizes="
-        (min-width: 44em) 100vw,
-        33vw"
+        sizes="33vw"
       />
     </div>
   );
