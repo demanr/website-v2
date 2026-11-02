@@ -136,6 +136,13 @@ export default function Navbar() {
             >
               /photography
             </button>
+            <button
+              type="button"
+              onClick={() => void router.push('/minecraft')}
+              className="md:w-20 text-left hover:font-bold"
+            >
+              /minecraft
+            </button>
           </div>
         </div>
       </div>
