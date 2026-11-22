@@ -15,8 +15,9 @@ const DIAG_ANGLE_RAD = (70 * Math.PI) / 180;
 
 const BOAT_WIDTH = 166;
 const BOAT_HEIGHT = 59;
-const BOAT_HULL_BOTTOM = 58;
-const BOAT_LEFT_PAD = 24;
+const BOAT_HULL_BOTTOM = 55.7;
+// leave room behind the motor for the wake when the boat pins to the left
+const BOAT_LEFT_PAD = 80;
 
 const MOBILE_DOT_SIZE = 14;
 const MOBILE_LINE_LEFT_PAD = 20;
@@ -43,8 +44,86 @@ function formatDate(d: Date): string {
 }
 
 
-const boatHullPath = 'M20.4002 57.358C9.71922 57.358 10.0007 30.6284 10.0007 30.6284H108.905C119.304 30.6284 115.931 3.00781 115.931 3.00781L140.95 30.6284H164C164 30.6284 154.443 55.8959 137.577 57.358C120.711 58.8201 31.0812 57.358 20.4002 57.358Z';
-const boatCabinPath = 'M4.16481 14.3672H22.0983C22.0983 14.3672 23.649 14.4129 24.7885 14.6661C29.9165 15.8057 25.388 27.8185 25.388 27.8185H4.16481C4.16481 27.8185 -2.95602 14.3672 4.16481 14.3672Z';
+function PrincecraftBoat() {
+  return (
+    <g
+      fill="none"
+      stroke="#fff"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Evinrude outboard, tight to the transom */}
+      <path d="M4.5 25.5c0-2.6 1.8-4.3 4.4-4.3h8c2.5 0 4 1.7 4 4.2v4.6c0 2.6-1.8 4.4-4.4 4.4H9c-2.9 0-4.5-2-4.5-4.6z" />
+      <path d="M5 28.1h16" strokeWidth={1.2} />
+      <path d="M19 21.2v13" strokeWidth={1} opacity={0.5} />
+      <path d="M10 34.4h5.5l1 8.6H11z" />
+      <path d="M7.5 43h9.5" strokeWidth={1.3} />
+      <path d="M11.5 43 10.5 50h4l-1-7" />
+      <path d="M8 50.2h4" strokeWidth={1.3} />
+      <path d="M6.5 30.6h5" strokeWidth={1} opacity={0.7} />
+      <path d="M20.8 31.5 23 33.2" strokeWidth={1.2} />
+
+      {/* red deck edge */}
+      <path
+        d="M22 34 H134 C148 34 157 33.5 163 32 L161.7 35 C153 37.2 145 38.5 134 38.5 H22 Z"
+        fill="#B33A3A"
+        stroke="none"
+      />
+
+      {/* hull */}
+      <path d="M22 34 H134 C148 34 157 33.5 163 32 L160 38 C156 45 148 50 137 52 C116 55 85 56 54 55.7 H22 Z" />
+
+      {/* rub rail + lower hull line, both landing on the bow edge */}
+      <path
+        d="M22.5 38.4h110c13 0 23-1.5 29.2-3.4"
+        strokeWidth={1.2}
+        opacity={0.55}
+      />
+      <path
+        d="M22.5 47.3c47 1.1 85.5.4 110-2.7 9.6-1.2 18.5-3.2 29.2-9.6"
+        strokeWidth={1.2}
+      />
+
+      {/* clear wrap-around windshield, seated on the deck */}
+      <path
+        d="M98 34V20c5.5-.6 11 2.8 14.5 7.5L119 34z"
+        fill="#8FA3AD"
+        fillOpacity={0.22}
+        stroke="none"
+      />
+      <path d="M98 34V20c5.5-.6 11 2.8 14.5 7.5L119 34z" />
+      <path d="M98 24.5c4.5-.6 9 1.8 12 5.5" strokeWidth={1} opacity={0.7} />
+      <path
+        d="M99.5 31.5c.6-4 2.3-7.4 5-9.3"
+        strokeWidth={1}
+        opacity={0.45}
+      />
+
+      {/* connected white + yellow side stripes */}
+      <path
+        d="M42 47.4 49 38.6h4l-7 8.8z"
+        fill="#fff"
+        stroke="none"
+        opacity={0.95}
+      />
+      <path d="M46 47.4 53 38.6h4l-7 8.8z" fill="#E8B93B" stroke="none" />
+
+      <text
+        x="59.5"
+        y="46"
+        fontSize="4.6"
+        fontWeight="700"
+        letterSpacing=".7"
+        fill="#fff"
+        stroke="none"
+        fontFamily={FONT_FAMILY}
+      >
+        PRINCECRAFT
+      </text>
+    </g>
+  );
+}
 
 function MobileTimeline() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -423,25 +502,6 @@ function DesktopTimeline() {
             {dateText}
           </div>
 
-          <svg
-            width={BOAT_WIDTH}
-            height={BOAT_HEIGHT}
-            viewBox="0 0 166 59"
-            className="overflow-visible"
-            style={{
-              position: 'absolute',
-              top: boatTop,
-              left: BOAT_LEFT_PAD,
-              transform: `rotate(${tiltAngle}deg)`,
-              transformOrigin: `0px ${BOAT_HULL_BOTTOM}px`,
-            }}
-          >
-            <g>
-              <path d={boatHullPath} stroke="white" strokeWidth={2} fill="none" />
-              <path d={boatCabinPath} stroke="white" strokeWidth={2} fill="none" />
-            </g>
-          </svg>
-
           {wakeScale > 0.01 && (
             <svg
               className="overflow-visible"
@@ -463,115 +523,99 @@ function DesktopTimeline() {
                 </filter>
               </defs>
               {(() => {
-                const sternX = BOAT_LEFT_PAD + 164;
-                const waterlineY = boatTop + BOAT_HULL_BOTTOM - 10;
+                // The stream trails from the back of the motor, to the left.
+                const sternX = BOAT_LEFT_PAD + 4.5;
+                const waterlineY = boatTop + BOAT_HULL_BOTTOM;
                 const len = WAKE_LEN * Math.max(wakeScale, peakWakeRef.current);
                 const dispY = wakeScale;
-                const sinkOffset = (1 - wakeScale) * 5;
                 const els: JSX.Element[] = [];
                 let k = 0;
 
-                // Layer 0: Bow wave — starts partway along hull, stretches into stern wake
-                const bowTipX = BOAT_LEFT_PAD + BOAT_WIDTH - 2;
-                const bowStartX = bowTipX - 30;
-                const totalBowLen = ((bowStartX - sternX) + len) * 1.5;
-                const bowCount = 40;
-                for (let i = 0; i < bowCount; i++) {
-                  const t = i / bowCount;
-                  const x = bowStartX - t * totalBowLen;
-                  const peakT = 0.08;
-                  const crestHeight = t < peakT
-                    ? (t / peakT) * 8
-                    : Math.pow(Math.max(0, 1 - (t - peakT) / (1 - peakT)), 1.4) * 8;
-                  const undulate = Math.sin(i * 1.5 + 0.6) * (1 + t * 2) * dispY;
-                  const y = waterlineY - crestHeight * dispY + undulate + sinkOffset;
-                  const fade = Math.pow(1 - t, 1.03);
-                  const r = 5 + Math.sin(i * 1.8) * 2 + (t < 0.3 ? (1 - t / 0.3) * 3 : 0);
+                const count = 22;
+                for (let i = 0; i < count; i++) {
+                  const t = i / (count - 1);
+                  const x = sternX - t * len;
+                  const fade = Math.pow(1 - t, 1.3);
+                  const y =
+                    waterlineY +
+                    Math.sin(i * 2.1 + 0.4) * (1.2 + t * 2.6) * dispY;
+                  const r = 3.5 + t * 9 + Math.sin(i * 1.7) * 1.8;
                   els.push(
-                    <circle key={k++} cx={x} cy={y} r={r}
-                      fill="white" opacity={fade * 0.35 * wakeScale}
-                      filter="url(#wake-blur)" />
+                    <circle
+                      key={k++}
+                      cx={x}
+                      cy={y}
+                      r={r}
+                      fill="white"
+                      opacity={fade * 0.5 * wakeScale}
+                      filter="url(#wake-blur-lg)"
+                    />,
                   );
                   if (i % 3 === 0) {
                     els.push(
-                      <circle key={k++} cx={x - r * 0.3} cy={y + r * 0.5} r={r * 0.5}
-                        fill="white" opacity={fade * 0.59 * wakeScale}
-                        filter="url(#wake-blur)" />
+                      <circle
+                        key={k++}
+                        cx={x + r * 0.45}
+                        cy={y - r * 0.35}
+                        r={r * 0.55}
+                        fill="white"
+                        opacity={fade * 0.3 * wakeScale}
+                        filter="url(#wake-blur)"
+                      />,
                     );
                   }
                 }
 
-                // Layer 1: Dense foam churn right at the stern (scales with wakeScale)
-                // const churnSpread = 30 * wakeScale;
-                // for (let i = 0; i < 8; i++) {
-                //   const t = i / 8;
-                //   const x = sternX - t * churnSpread;
-                //   const y = waterlineY - 2 + Math.sin(i * 1.8) * 4;
-                //   const r = (6 + t * 8) * Math.max(0.4, wakeScale);
-                //   els.push(
-                //     <circle key={k++} cx={x} cy={y} r={r}
-                //       fill="white" opacity={0.25 * wakeScale * (1 - t * 0.5)}
-                //       filter="url(#wake-blur)" />
-                //   );
-                // }
-
-                // Layer 2: Rolling foam clouds that expand outward
-                const cloudCount = 14;
-                for (let i = 0; i < cloudCount; i++) {
-                  const t = i / cloudCount;
-                  const x = sternX - 15 - t * len;
-                  const fade = Math.pow(1 - t, 1.2);
-                  const spreadY = t * 12 * dispY;
-                  const y = waterlineY + Math.sin(i * 2.4 + 0.5) * spreadY + sinkOffset;
-                  const baseR = 5 + t * 12;
-                  const r = baseR + Math.sin(i * 1.9) * 6;
+                // Dense churn right behind the motor.
+                for (let i = 0; i < 7; i++) {
+                  const t = i / 7;
+                  const x = sternX - t * 26;
+                  const y = waterlineY + Math.sin(i * 2.4) * 3 * dispY;
+                  const r = 4 + t * 3;
                   els.push(
-                    <circle key={k++} cx={x} cy={y} r={r}
-                      fill="white" opacity={fade * 0.7 * wakeScale}
-                      filter="url(#wake-blur-lg)" />
+                    <circle
+                      key={k++}
+                      cx={x}
+                      cy={y}
+                      r={r}
+                      fill="white"
+                      opacity={0.4 * (1 - t) * wakeScale}
+                      filter="url(#wake-blur)"
+                    />,
                   );
-                  if (i % 2 === 0) {
-                    els.push(
-                      <circle key={k++} cx={x + r * 0.4} cy={y - r * 0.3 * dispY} r={r * 0.6}
-                        fill="white" opacity={fade * 0.42 * wakeScale}
-                        filter="url(#wake-blur-lg)" />
-                    );
-                  }
                 }
-
-                // Layer 3: Upper splash droplets — small rising puffs
-                // for (let i = 0; i < 6; i++) {
-                //   const t = (i + 1) / 7;
-                //   const x = sternX - 10 - t * len * 0.5;
-                //   const y = waterlineY - 8 - Math.sin(i * 1.3) * (6 + t * 10);
-                //   const r = 3 + t * 5;
-                //   const fade = Math.pow(1 - t, 2);
-                //   els.push(
-                //     <circle key={k++} cx={x} cy={y} r={r}
-                //       fill="white" opacity={fade * 0.14 * wakeScale}
-                //       filter="url(#wake-blur)" />
-                //   );
-                // }
-
-                // Layer 4: Trailing thin foam line at waterline
-                // for (let i = 0; i < 10; i++) {
-                //   const t = (i + 1) / 10;
-                //   const x = sternX - 15 - t * len;
-                //   const y = waterlineY + Math.sin(i * 3.7) * 2;
-                //   const rx = 8 + t * 14;
-                //   const ry = 2 + t * 3;
-                //   const fade = Math.pow(1 - t, 1.8);
-                //   els.push(
-                //     <ellipse key={k++} cx={x} cy={y} rx={rx} ry={ry}
-                //       fill="white" opacity={fade * 0.1 * wakeScale}
-                //       filter="url(#wake-blur)" />
-                //   );
-                // }
 
                 return <g>{els}</g>;
               })()}
             </svg>
           )}
+
+          <div
+            className="boat-bob"
+            style={{
+              position: 'absolute',
+              top: boatTop,
+              left: BOAT_LEFT_PAD,
+              width: BOAT_WIDTH,
+              height: BOAT_HEIGHT,
+              transformOrigin: '80px 44px',
+            }}
+          >
+            <svg
+              width={BOAT_WIDTH}
+              height={BOAT_HEIGHT}
+              viewBox="0 0 166 59"
+              className="overflow-visible"
+              style={{
+                display: 'block',
+                transform: `rotate(${tiltAngle}deg)`,
+                transformOrigin: `0px ${BOAT_HULL_BOTTOM}px`,
+              }}
+            >
+              <PrincecraftBoat />
+            </svg>
+          </div>
+
         </div>
       </div>
     </div>

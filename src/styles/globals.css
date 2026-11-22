@@ -31,3 +31,24 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes boat-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.7deg);
+  }
+  50% {
+    transform: translateY(-1.5px) rotate(0.8deg);
+  }
+}
+
+.boat-bob {
+  animation: boat-bob 4.4s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boat-bob {
+    animation: none;
+  }
+}
