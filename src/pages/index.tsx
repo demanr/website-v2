@@ -219,7 +219,7 @@ export default function Home() {
       <div className="hidden h-full md:block">
         <div
           id="home-scroll-desktop"
-          className="h-full overflow-x-auto "
+          className="h-full overflow-x-auto no-scrollbar"
           onWheel={handleDesktopHorizontalWheel}
         >
           <div className="flex items-start h-full my-auto">
@@ -276,19 +276,9 @@ export default function Home() {
             </div>
             <div
               id="positions-desktop"
-              className="relative z-10 flex-none px-16 my-auto"
+              className="relative z-10 flex-none pl-16 my-auto"
             >
               <Timeline />
-            </div>
-            <div className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10">
-              <Image
-                src="/minecraft_under_construction.png"
-                alt="Under construction"
-                width={700}
-                height={394}
-                className="right-0 h-auto max-w-md w-60"
-                priority
-              />
             </div>
           </div>
         </div>

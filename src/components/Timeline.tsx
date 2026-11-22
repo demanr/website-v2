@@ -10,7 +10,8 @@ const DESKTOP_DASH = 24;
 const DESKTOP_GAP = 24;
 const SHORT_DIAG = 64;
 const TALL_DIAG = 115;
-const DIAG_ANGLE_RAD = (67 * Math.PI) / 180;
+// 20 degrees off straight south (i.e. down and slightly to the left)
+const DIAG_ANGLE_RAD = (70 * Math.PI) / 180;
 
 const BOAT_WIDTH = 166;
 const BOAT_HEIGHT = 59;
@@ -18,12 +19,13 @@ const BOAT_HULL_BOTTOM = 58;
 const BOAT_LEFT_PAD = 24;
 
 const MOBILE_DOT_SIZE = 14;
-const MOBILE_LINE_X = 28;
-const MOBILE_DASH = 16;
-const MOBILE_GAP = 16;
-const MOBILE_DIAG = 50;
+const MOBILE_LINE_LEFT_PAD = 20;
+const MOBILE_DASH = 6;
+const MOBILE_GAP = 8;
+const MOBILE_DIAG = 48;
 const MOBILE_DIAG_ANGLE_RAD = (25 * Math.PI) / 180;
-const MOBILE_SPACING_PER_MONTH = 12;
+const MOBILE_SPACING_PER_MONTH = 16;
+const MOBILE_TOP_PAD = 28;
 
 const MAX_TILT_DEG = 15;
 const MAX_WAKE_SCALE = 1;
@@ -31,15 +33,6 @@ const WAKE_LEN = 280;
 const WAKE_SPEED_THRESHOLD = 0.4;
 
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
-
-function measureWidth(text: string, fontSize: number, weight: string): number {
-  if (typeof document === 'undefined') return 0;
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return 0;
-  ctx.font = `${weight} ${fontSize}px ${FONT_FAMILY}`;
-  return ctx.measureText(text).width;
-}
 
 function monthsBetween(a: Date, b: Date): number {
   return (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
@@ -54,91 +47,138 @@ const boatHullPath = 'M20.4002 57.358C9.71922 57.358 10.0007 30.6284 10.0007 30.
 const boatCabinPath = 'M4.16481 14.3672H22.0983C22.0983 14.3672 23.649 14.4129 24.7885 14.6661C29.9165 15.8057 25.388 27.8185 25.388 27.8185H4.16481C4.16481 27.8185 -2.95602 14.3672 4.16481 14.3672Z';
 
 function MobileTimeline() {
-  const cumulativeMonths = useMemo(() => {
-    const result: number[] = [0];
-    for (let i = 1; i < positions.length; i++) {
-      result.push(result[i - 1] + monthsBetween(positions[i - 1].startDate, positions[i].startDate));
-    }
-    return result;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const element = wrapRef.current;
+    if (!element) return;
+
+    const update = () => setWidth(element.clientWidth);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
+  // newest first
+  const orderedPositions = positions;
+
+  const cumulativeMonths = useMemo(() => {
+    const result: number[] = [0];
+    for (let i = 1; i < orderedPositions.length; i++) {
+      result.push(
+        result[i - 1] +
+          monthsBetween(
+            orderedPositions[i - 1].startDate,
+            orderedPositions[i].startDate,
+          ),
+      );
+    }
+    return result;
+  }, [orderedPositions]);
+
   const totalMonths = cumulativeMonths[cumulativeMonths.length - 1];
-  const svgHeight = 60 + totalMonths * MOBILE_SPACING_PER_MONTH;
+  const lineX = MOBILE_LINE_LEFT_PAD;
+  const lineTop = MOBILE_TOP_PAD;
+  const lineBottom = MOBILE_TOP_PAD + totalMonths * MOBILE_SPACING_PER_MONTH;
+  const svgHeight = lineBottom + 72;
 
   const dotCenters = useMemo(() => {
     return cumulativeMonths.map((m) => ({
-      x: MOBILE_LINE_X,
-      y: 40 + m * MOBILE_SPACING_PER_MONTH,
+      x: lineX,
+      y: MOBILE_TOP_PAD + m * MOBILE_SPACING_PER_MONTH,
     }));
-  }, [cumulativeMonths]);
+  }, [cumulativeMonths, lineX]);
 
-  const yearLabels: { year: number; y: number }[] = useMemo(() => {
-    const labels: { year: number; y: number }[] = [];
-    let currentYear = -1;
-    for (let i = 0; i < positions.length; i++) {
-      const year = positions[i].startDate.getFullYear();
-      if (year !== currentYear) {
-        labels.push({ year, y: dotCenters[i].y });
-        currentYear = year;
-      }
-    }
-    return labels;
-  }, [dotCenters]);
-
-  const textWidths = useMemo(() => {
-    return positions.map((p) => {
-      const cw = measureWidth(p.company, 15, '700');
-      const tw = measureWidth(p.title, 15, '400');
-      return Math.max(cw, tw);
-    });
-  }, []);
+  const dx = MOBILE_DIAG * Math.cos(MOBILE_DIAG_ANGLE_RAD);
+  const dy = MOBILE_DIAG * Math.sin(MOBILE_DIAG_ANGLE_RAD);
 
   return (
-    <div className="w-full px-12 py-4">
-      <svg width="100%" height={svgHeight} className="overflow-visible">
-        <line
-          x1={MOBILE_LINE_X}
-          y1={40}
-          x2={MOBILE_LINE_X}
-          y2={40 + totalMonths * MOBILE_SPACING_PER_MONTH}
-          stroke="white"
-          strokeWidth={1.5}
-          strokeDasharray={`${MOBILE_DASH} ${MOBILE_GAP}`}
-        />
-        {dotCenters.map((c, i) => {
-          const dx = MOBILE_DIAG * Math.cos(MOBILE_DIAG_ANGLE_RAD);
-          const dy = MOBILE_DIAG * Math.sin(MOBILE_DIAG_ANGLE_RAD);
-          const endX = c.x + dx;
-          const endY = c.y + dy;
+    <div className="w-full" ref={wrapRef}>
+      {width > 0 && (
+        <svg width={width} height={svgHeight} className="overflow-visible">
+          <line
+            x1={lineX}
+            y1={lineTop}
+            x2={lineX}
+            y2={lineBottom}
+            stroke="white"
+            strokeWidth={1.5}
+            strokeDasharray={`${MOBILE_DASH} ${MOBILE_GAP}`}
+          />
+          <line
+            x1={lineX - 6}
+            y1={lineTop}
+            x2={lineX + 6}
+            y2={lineTop}
+            stroke="white"
+            strokeWidth={1.5}
+          />
+          <line
+            x1={lineX - 6}
+            y1={lineBottom}
+            x2={lineX + 6}
+            y2={lineBottom}
+            stroke="white"
+            strokeWidth={1.5}
+          />
 
-          return (
-            <g key={i}>
-              <line x1={c.x} y1={c.y} x2={endX} y2={endY} stroke="white" strokeWidth={1} />
-              <circle cx={c.x} cy={c.y} r={MOBILE_DOT_SIZE / 2} fill="#0C0D14" stroke="white" strokeWidth={1.5} />
-              <foreignObject x={endX + 8} y={endY - 12} width={textWidths[i]} height={44}>
-                <div {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)} style={{ color: 'white', fontSize: 15, fontFamily: FONT_FAMILY, textAlign: 'left' }}>
-                  <div style={{ fontWeight: 700, textDecoration: 'underline' }}>{positions[i].company}</div>
-                  <div>{positions[i].title}</div>
-                </div>
-              </foreignObject>
-            </g>
-          );
-        })}
-        {yearLabels.map((ly) => (
-          <text
-            key={ly.year}
-            x={MOBILE_LINE_X - 12}
-            y={ly.y}
-            textAnchor="end"
-            fill="white"
-            fontSize={12}
-            fontFamily={FONT_FAMILY}
-            opacity={0.6}
-          >
-            {ly.year}
-          </text>
-        ))}
-      </svg>
+          {dotCenters.map((c, i) => {
+            const endX = c.x + dx;
+            const endY = c.y + dy;
+
+            return (
+              <g key={orderedPositions[i].company + orderedPositions[i].title}>
+                <line
+                  x1={c.x}
+                  y1={c.y}
+                  x2={endX}
+                  y2={endY}
+                  stroke="white"
+                  strokeWidth={1}
+                />
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={MOBILE_DOT_SIZE / 2}
+                  fill="#0C0D14"
+                  stroke="white"
+                  strokeWidth={1.5}
+                />
+                <foreignObject
+                  x={endX + 10}
+                  y={endY - 10}
+                  width={Math.max(width - endX - 24, 40)}
+                  height={54}
+                >
+                  <div
+                    {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)}
+                    style={{
+                      color: 'white',
+                      fontSize: 15,
+                      fontFamily: FONT_FAMILY,
+                      textAlign: 'left',
+                      lineHeight: 1.25,
+                    }}
+                  >
+                    <div
+                      style={{ fontWeight: 700, textDecoration: 'underline' }}
+                    >
+                      {orderedPositions[i].company}
+                    </div>
+                    <div>{orderedPositions[i].title}</div>
+                    <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>
+                      {formatDate(orderedPositions[i].startDate)}
+                    </div>
+                  </div>
+                </foreignObject>
+              </g>
+            );
+          })}
+        </svg>
+      )}
     </div>
   );
 }
@@ -169,16 +209,26 @@ function DesktopTimeline() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  // newest first
+  const orderedPositions = positions;
+
   const cumulativeMonths = useMemo(() => {
     const result: number[] = [0];
-    for (let i = 1; i < positions.length; i++) {
-      result.push(result[i - 1] + monthsBetween(positions[i - 1].startDate, positions[i].startDate));
+    for (let i = 1; i < orderedPositions.length; i++) {
+      result.push(
+        result[i - 1] +
+          monthsBetween(
+            orderedPositions[i - 1].startDate,
+            orderedPositions[i].startDate,
+          ),
+      );
     }
     return result;
-  }, []);
+  }, [orderedPositions]);
 
   const totalMonths = cumulativeMonths[cumulativeMonths.length - 1];
-  const timelineWidth = totalMonths * spacingPerMonth + 60;
+  // extra room after the oldest dot so its label is never clipped
+  const timelineWidth = totalMonths * spacingPerMonth + 120;
   const gapWidth = windowWidth / 8;
   const boatAndGapWidth = BOAT_LEFT_PAD + BOAT_WIDTH + gapWidth;
 
@@ -213,12 +263,12 @@ function DesktopTimeline() {
     const svgXAtBoat = BOAT_LEFT_PAD - sectionRect.left;
     const progress = Math.max(0, Math.min(1, (svgXAtBoat - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
 
-    const newestDate = positions[0].startDate;
-    const oldestDate = positions[positions.length - 1].startDate;
+    const newestDate = orderedPositions[0].startDate;
+    const oldestDate = orderedPositions[orderedPositions.length - 1].startDate;
     const dateRange = oldestDate.getTime() - newestDate.getTime();
     const currentDate = new Date(newestDate.getTime() + dateRange * progress);
     setDateText(formatDate(currentDate));
-  }, [boatAndGapWidth, timelineWidth]);
+  }, [boatAndGapWidth, spacingPerMonth, totalMonths]);
 
   useEffect(() => {
     const container = document.getElementById('home-scroll-desktop');
@@ -343,8 +393,8 @@ function DesktopTimeline() {
               <circle cx={dotX} cy={c.y} r={DOT_SIZE / 2} fill="#0C0D14" stroke="white" strokeWidth={1.5} />
               <foreignObject x={endX - 112} y={endY + 18} width={LABEL_WIDTH} height={50}>
                 <div {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)} style={{ color: 'white', fontSize: 18, fontFamily: FONT_FAMILY, textAlign: 'center' }}>
-                  <div style={{ fontWeight: 700, textDecoration: 'underline'}}>{positions[i].company}</div>
-                  <div>{positions[i].title}</div>
+                  <div style={{ fontWeight: 700, textDecoration: 'underline'}}>{orderedPositions[i].company}</div>
+                  <div>{orderedPositions[i].title}</div>
                 </div>
               </foreignObject>
             </g>
