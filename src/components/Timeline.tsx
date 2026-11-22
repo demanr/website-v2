@@ -43,31 +43,46 @@ function formatDate(d: Date): string {
 
 function BowWake({ scale, phase }: { scale: number; phase: number }) {
   if (scale <= 0.01) return null;
-  const disp = scale;
-  const sheet =
-    'M 162 56 C 154 44 140 35 118 32 C 118 38 120 41 124 43 C 136 46 150 50 158 56 Z';
-  const outer = 'M 162 56 C 154 44 140 35 118 32';
-  const mid = 'M 160 56 C 150 47 136 40 120 37';
-  const low = 'M 157 56 C 146 50 133 45 120 44';
+  const k = Math.min(1, scale * 1.35);
+  const startX = 163;
+  const startY = 55.5;
+  const reachX = startX - (14 + 32 * k);
+  const reachY = startY - (3 + 10 * k);
+  const outer = `M ${startX} ${startY} C ${startX - 6 - 12 * k} ${
+    startY - 2 - 8 * k
+  }, ${startX - 16 - 22 * k} ${startY - 3 - 10 * k}, ${reachX} ${reachY}`;
+  const mid = `M ${startX - 1} ${startY - 0.5} C ${
+    startX - 6 - 8 * k
+  } ${startY - 2 - 4 * k}, ${startX - 9 - 14 * k} ${
+    startY - 2.5 - 5 * k
+  }, ${startX - (10 + 20 * k)} ${startY - (2 + 6 * k)}`;
+  const low = `M ${startX - 2} ${startY - 1} C ${
+    startX - 7 - 6 * k
+  } ${startY - 3 - 2 * k}, ${startX - 10 - 10 * k} ${
+    startY - 3.5 - 2.5 * k
+  }, ${startX - (8 + 12 * k)} ${startY - (1 + 3 * k)}`;
+  const sheet = `${outer} C ${reachX + 8} ${reachY + 6}, ${
+    startX - 4
+  } ${startY - 1}, ${startX} ${startY} Z`;
 
   return (
     <g pointerEvents="none">
-      <path d={sheet} fill="#DCE8EC" fillOpacity={0.16 * disp} />
+      <path d={sheet} fill="#DCE8EC" fillOpacity={0.14 * k} />
       <path
         d={outer}
         fill="none"
         stroke="#fff"
-        strokeWidth={1.6}
+        strokeWidth={1.8}
         strokeLinecap="round"
-        opacity={0.7 * disp}
+        opacity={Math.min(1, k * 1.3)}
       />
       <path
         d={mid}
         fill="none"
         stroke="#fff"
-        strokeWidth={1.2}
+        strokeWidth={1.3}
         strokeLinecap="round"
-        opacity={0.55 * disp}
+        opacity={Math.min(0.8, k * 1.1)}
       />
       <path
         d={low}
@@ -75,14 +90,15 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
         stroke="#fff"
         strokeWidth={1}
         strokeLinecap="round"
-        opacity={0.4 * disp}
+        opacity={Math.min(0.55, k * 0.9)}
       />
-      {Array.from({ length: 10 }).map((_, i) => {
-        const t = (i + 1) / 11;
+      {Array.from({ length: 9 }).map((_, i) => {
+        const t = (i + 1) / 10;
         const rise = Math.abs(Math.sin(phase * 1.8 + i * 1.1));
-        const x = 120 + t * 38 + Math.sin(phase + i) * 1.8;
-        const y = 42 - rise * (4 + t * 12) * disp;
-        const r = 1.1 + t * 1.3;
+        const x =
+          startX - (4 + t * (18 + 22 * k)) + Math.sin(phase + i) * 1.5;
+        const y = 54 - rise * (1.5 + (3 + 9 * k) * t);
+        const r = 0.9 + t * (1 + 1.2 * k);
         return (
           <circle
             key={i}
@@ -90,17 +106,17 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
             cy={y}
             r={r}
             fill="#fff"
-            opacity={(0.78 - t * 0.25) * disp}
+            opacity={(0.8 - t * 0.25) * k}
           />
         );
       })}
       <ellipse
         cx={160}
-        cy={55.2}
-        rx={9 * disp}
-        ry={1.8 * disp}
+        cy={55}
+        rx={6 + 5 * k}
+        ry={1.5}
         fill="#fff"
-        opacity={0.2 * disp}
+        opacity={0.18 * k}
       />
     </g>
   );
@@ -399,7 +415,7 @@ function DesktopTimeline() {
       currentTiltRef.current += (targetTilt - currentTiltRef.current) * REEMERGE;
       // The wake is about motion, not exact velocity: any meaningful scroll
       // delta brings it up immediately, then the loop fades it out.
-      const wakeTarget = Math.min(1, dScroll / 14);
+      const wakeTarget = Math.min(1, dScroll / 10);
       currentWakeRef.current = Math.max(currentWakeRef.current, wakeTarget);
     }
 
@@ -639,9 +655,9 @@ function DesktopTimeline() {
                     }, ${sternX - 120} ${waterlineY - 1}`}
                     fill="none"
                     stroke="white"
-                    strokeWidth={1.5}
+                    strokeWidth={2}
                     strokeLinecap="round"
-                    opacity={0.6 * disp}
+                    opacity={0.75 * disp}
                   />,
                 );
                 els.push(
@@ -654,53 +670,9 @@ function DesktopTimeline() {
                     }, ${sternX - 136} ${waterlineY + 4}`}
                     fill="none"
                     stroke="white"
-                    strokeWidth={1.4}
+                    strokeWidth={2}
                     strokeLinecap="round"
-                    opacity={0.5 * disp}
-                  />,
-                );
-                els.push(
-                  <path
-                    key={k++}
-                    d={`M ${sternX} ${waterlineY + 1} C ${
-                      sternX - 40
-                    } ${waterlineY + 2}, ${sternX - 90} ${
-                      waterlineY + 4
-                    }, ${sternX - 160} ${waterlineY + 4}`}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={1}
-                    opacity={0.22 * disp}
-                  />,
-                );
-
-                // Stern splash, using the same language as the bow.
-                const splash = `M ${sternX + 2} ${waterlineY + 2} C ${
-                  sternX - 8
-                } ${waterlineY - 7}, ${sternX - 18} ${
-                  waterlineY - 8
-                }, ${sternX - 28} ${waterlineY - 2} C ${
-                  sternX - 20
-                } ${waterlineY + 3}, ${sternX - 10} ${
-                  waterlineY + 4
-                }, ${sternX + 2} ${waterlineY + 3} Z`;
-                els.push(
-                  <path
-                    key={k++}
-                    d={splash}
-                    fill="white"
-                    opacity={0.16 * disp}
-                  />,
-                );
-                els.push(
-                  <path
-                    key={k++}
-                    d={splash}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={1.4}
-                    strokeLinecap="round"
-                    opacity={0.7 * disp}
+                    opacity={0.65 * disp}
                   />,
                 );
 
