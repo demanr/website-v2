@@ -45,46 +45,44 @@ function formatDate(d: Date): string {
 function BowWake({ scale, phase }: { scale: number; phase: number }) {
   if (scale <= 0.01) return null;
   const k = Math.min(1, scale * 1.35);
-  const startX = 163;
-  const startY = 55.5;
-  const reachX = startX - (14 + 32 * k);
-  const reachY = startY - (3 + 10 * k);
-  const outer = `M ${startX} ${startY} C ${startX - 6 - 12 * k} ${
-    startY - 2 - 8 * k
-  }, ${startX - 16 - 22 * k} ${startY - 3 - 10 * k}, ${reachX} ${reachY}`;
-  const sheet = `${outer} C ${reachX + 8} ${reachY + 6}, ${
-    startX - 4
-  } ${startY - 1}, ${startX} ${startY} Z`;
+  const x0 = 159;
+  const y0 = 55;
+  const count = 14;
 
   return (
     <g pointerEvents="none">
-      <path d={sheet} fill="#DCE8EC" fillOpacity={0.14 * k} />
-      {Array.from({ length: 9 }).map((_, i) => {
-        const t = (i + 1) / 10;
-        const rise = Math.abs(Math.sin(phase * 1.8 + i * 1.1));
-        const x =
-          startX - (4 + t * (18 + 22 * k)) + Math.sin(phase + i) * 1.5;
-        const y = 54 - rise * (1.5 + (3 + 9 * k) * t);
-        const r = 0.9 + t * (1 + 1.2 * k);
+      {Array.from({ length: count }).map((_, i) => {
+        const t = (phase * 0.1 + i / count) % 1;
+        const reach = (7 + 26 * k) * (0.65 + 0.35 * Math.sin(i * 1.7 + 0.6));
+        const height = (3 + 13 * k) * (0.7 + 0.3 * Math.sin(i * 2.3 + 1.2));
+        const x = x0 - reach * t + Math.sin(i * 3.1) * 0.8;
+        const y = y0 - 4 * height * t * (1 - t);
+        const fade = Math.sin(Math.PI * t);
+        const r = 0.7 + (0.8 + 0.8 * Math.sin(i * 2.7 + 0.4)) * k;
         return (
           <circle
             key={i}
             cx={x}
             cy={y}
-            r={r}
+            r={Math.max(0.5, r)}
             fill={WAKE_GREY}
-            opacity={(0.6 - t * 0.2) * k}
+            opacity={0.55 * k * fade}
           />
         );
       })}
-      <ellipse
-        cx={160}
-        cy={55}
-        rx={6 + 5 * k}
-        ry={1.5}
-        fill={WAKE_GREY}
-        opacity={0.16 * k}
-      />
+      {Array.from({ length: 6 }).map((_, i) => {
+        const a = phase * 0.7 + i;
+        return (
+          <circle
+            key={`c${i}`}
+            cx={x0 - 1 + Math.cos(a) * (2 + i * 0.6)}
+            cy={y0 + Math.sin(a) * 1.6}
+            r={1 + (i % 3) * 0.5}
+            fill={WAKE_GREY}
+            opacity={0.45 * k}
+          />
+        );
+      })}
     </g>
   );
 }
@@ -559,25 +557,6 @@ function DesktopTimeline() {
                 pointerEvents: 'none',
               }}
             >
-              <defs>
-                <filter id="wake-soft" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="2.5" />
-                </filter>
-                <filter id="wake-glow" x="-60%" y="-60%" width="220%" height="220%">
-                  <feGaussianBlur stdDeviation="6" />
-                </filter>
-                <linearGradient
-                  id="wake-trail"
-                  gradientUnits="userSpaceOnUse"
-                  x1="84"
-                  y1="0"
-                  x2="-70"
-                  y2="0"
-                >
-                  <stop offset="0" stopColor={WAKE_GREY} stopOpacity=".22" />
-                  <stop offset="1" stopColor="white" stopOpacity="0" />
-                </linearGradient>
-              </defs>
               {(() => {
                 const waterlineY = boatTop + BOAT_HULL_BOTTOM;
                 const disp = wakeScale;
@@ -586,45 +565,15 @@ function DesktopTimeline() {
                 const els: JSX.Element[] = [];
                 let k = 0;
 
-                // Soft foam band straight behind the motor.
-                els.push(
-                  <rect
-                    key={k++}
-                    x={-70}
-                    y={waterlineY - 3}
-                    width={154}
-                    height={6}
-                    fill="url(#wake-trail)"
-                    opacity={disp}
-                  />,
-                );
-                els.push(
-                  <ellipse
-                    key={k++}
-                    cx={sternX - 12}
-                    cy={waterlineY}
-                    rx={26}
-                    ry={4}
-                    fill={WAKE_GREY}
-                    opacity={0.16 * disp}
-                    filter="url(#wake-glow)"
-                  />,
-                );
-
-                // Clustered churn behind the motor, not a straight row.
-                const churn = [
-                  [-4, -2, 2.6],
-                  [-9, 1, 2.2],
-                  [-13, -2, 1.8],
-                  [-7, 4, 1.6],
-                  [-17, 2, 1.4],
-                  [-21, -1, 1.2],
-                ];
-                for (let i = 0; i < churn.length; i++) {
-                  const [dx, dy, r] = churn[i];
-                  const x = sternX + dx + Math.sin(phase * 1.5 + i) * 1.2;
+                // Dense bubbles right at the motor.
+                for (let i = 0; i < 10; i++) {
+                  const a = i * 1.7;
+                  const x =
+                    sternX - 2 - (i % 4) * 2.2 + Math.sin(phase + a) * 1.2;
                   const y =
-                    waterlineY + dy + Math.sin(phase * 1.8 + i * 1.7) * 1.8 * disp;
+                    waterlineY +
+                    Math.sin(phase * 1.2 + a) * (1.5 + (i % 3) * 1.2);
+                  const r = 1 + (i % 4) * 0.45;
                   els.push(
                     <circle
                       key={k++}
@@ -632,53 +581,37 @@ function DesktopTimeline() {
                       cy={y}
                       r={r}
                       fill={WAKE_GREY}
-                      opacity={(0.5 - i * 0.05) * disp}
-                      filter="url(#wake-soft)"
+                      opacity={0.5 * disp}
                     />,
                   );
                 }
 
-                // Scattered bubbles trailing off, not a straight row.
-                const clusters = [
-                  [-14, -2],
-                  [-30, 2],
-                  [-48, 0],
-                ];
-                for (let c = 0; c < clusters.length; c++) {
-                  const [cx, cy] = clusters[c];
-                  const n = 4 - Math.min(c, 2);
-                  for (let b = 0; b < n; b++) {
-                    const a = (b / n) * Math.PI * 2 + phase * 0.6 + c;
-                    const rr = 1.2 + (b % 3) * 0.7;
-                    els.push(
-                      <circle
-                        key={k++}
-                        cx={sternX + cx + Math.cos(a) * (3 + b)}
-                        cy={waterlineY + cy + Math.sin(a) * (2 + c)}
-                        r={rr}
-                        fill={WAKE_GREY}
-                        opacity={(0.4 - c * 0.08) * disp}
-                        filter="url(#wake-soft)"
-                      />,
-                    );
-                  }
-                }
-
-                // A few droplets above the stern splash.
-                for (let i = 0; i < 4; i++) {
-                  const t = (i + 1) / 5;
-                  const rise = Math.abs(Math.sin(phase * 1.6 + i * 1.4));
-                  const x = sternX - 6 - t * 16;
-                  const y = waterlineY - 2 - rise * (3 + t * 7) * disp;
-                  const r = 1 + t * 1.1;
+                // Loose bubble trail spreading aft.
+                const count = 22;
+                for (let i = 0; i < count; i++) {
+                  const t = i / (count - 1);
+                  const jitter = Math.sin(i * 12.9898) * 2.2;
+                  const x = sternX - 8 - t * 68 + jitter;
+                  const spread = 1.5 + t * 4.5;
+                  const y =
+                    waterlineY +
+                    Math.sin(i * 2.1 + phase * 1.4) * spread +
+                    Math.cos(i * 1.3) * 1.2;
+                  const r =
+                    0.7 +
+                    (0.8 + 0.7 * Math.sin(i * 3.3 + phase)) *
+                      (1 - t * 0.2);
+                  const fade =
+                    (1 - t) *
+                    (0.55 + 0.45 * Math.sin(phase * 1.5 + i * 1.1));
                   els.push(
                     <circle
                       key={k++}
                       cx={x}
                       cy={y}
-                      r={r}
+                      r={Math.max(0.4, r)}
                       fill={WAKE_GREY}
-                      opacity={(0.55 - t * 0.18) * disp}
+                      opacity={Math.max(0, fade) * 0.5 * disp}
                     />,
                   );
                 }
