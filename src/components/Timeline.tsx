@@ -33,6 +33,30 @@ const MAX_TILT_DEG = 15;
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
 const WAKE_GREY = '#B9CAD2';
 
+// Lower hull boundary from the bow tip down to the bottom, used to keep the
+// bow bubbles hugging the edge as speed grows.
+const HULL_EDGE: Array<[number, number]> = [
+  [163, 32],
+  [160.5, 38],
+  [157, 44],
+  [151, 48.5],
+  [143, 51.5],
+  [132, 53.5],
+  [116, 55],
+  [96, 55.8],
+  [76, 56],
+  [54, 55.7],
+];
+
+function sampleHullEdge(u: number) {
+  const scaled = Math.max(0, Math.min(1, u)) * (HULL_EDGE.length - 1);
+  const i = Math.min(HULL_EDGE.length - 2, Math.floor(scaled));
+  const t = scaled - i;
+  const [x1, y1] = HULL_EDGE[i];
+  const [x2, y2] = HULL_EDGE[i + 1];
+  return { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t };
+}
+
 function monthsBetween(a: Date, b: Date): number {
   return (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
 }
@@ -45,41 +69,54 @@ function formatDate(d: Date): string {
 function BowWake({ scale, phase }: { scale: number; phase: number }) {
   if (scale <= 0.01) return null;
   const k = Math.min(1, scale * 1.35);
-  const x0 = 159;
-  const y0 = 55;
-  const count = 14;
+  // As speed grows, the band climbs the bow edge and reaches further aft
+  // along the bottom; as it drops, the band shrinks back toward the bow.
+  const uStart = 0.33 - 0.15 * k;
+  const uEnd = 0.45 + 0.3 * k;
+  const count = 48;
 
   return (
     <g pointerEvents="none">
       {Array.from({ length: count }).map((_, i) => {
-        const t = (phase * 0.1 + i / count) % 1;
-        const reach = (7 + 26 * k) * (0.65 + 0.35 * Math.sin(i * 1.7 + 0.6));
-        const height = (3 + 13 * k) * (0.7 + 0.3 * Math.sin(i * 2.3 + 1.2));
-        const x = x0 - reach * t + Math.sin(i * 3.1) * 0.8;
-        const y = y0 - 4 * height * t * (1 - t);
-        const fade = Math.sin(Math.PI * t);
-        const r = 0.7 + (0.8 + 0.8 * Math.sin(i * 2.7 + 0.4)) * k;
+        const f = i / (count - 1);
+        const u = uStart + (uEnd - uStart) * f;
+        const { x, y } = sampleHullEdge(u);
+        const jx =
+          Math.sin(i * 2.3 + phase * 1.2) * 1.1 + Math.sin(i * 11.7) * 0.6;
+        const jy =
+          0.7 +
+          ((i * 7) % 5) * 0.55 +
+          Math.cos(i * 1.9 + phase * 1.3) * 0.8;
+        const r =
+          0.6 +
+          (0.5 + 0.5 * Math.sin(i * 1.7 + 0.4)) * (0.7 + 1.1 * k);
+        const fade =
+          (1 - 0.3 * f) * (0.7 + 0.3 * Math.sin(phase * 1.6 + i * 1.1));
         return (
           <circle
             key={i}
-            cx={x}
-            cy={y}
-            r={Math.max(0.5, r)}
+            cx={x + jx}
+            cy={y + jy}
+            r={Math.max(0.4, r)}
             fill={WAKE_GREY}
-            opacity={0.55 * k * fade}
+            opacity={0.65 * k * fade}
           />
         );
       })}
-      {Array.from({ length: 6 }).map((_, i) => {
-        const a = phase * 0.7 + i;
+      {Array.from({ length: 18 }).map((_, i) => {
+        const f = i / 17;
+        const u = uStart + (uEnd - uStart) * f;
+        const { x, y } = sampleHullEdge(u);
+        const r = 1.2 + 0.8 * Math.sin(i * 1.3);
+        const fade = 0.55 + 0.45 * Math.sin(phase * 1.4 + i * 1.7);
         return (
           <circle
-            key={`c${i}`}
-            cx={x0 - 1 + Math.cos(a) * (2 + i * 0.6)}
-            cy={y0 + Math.sin(a) * 1.6}
-            r={1 + (i % 3) * 0.5}
+            key={`l${i}`}
+            cx={x + Math.sin(i * 3.1) * 1.4}
+            cy={y + 2.6 + Math.cos(i * 1.5) * 0.9}
+            r={Math.max(0.5, r * (0.6 + 0.6 * k))}
             fill={WAKE_GREY}
-            opacity={0.45 * k}
+            opacity={0.35 * k * fade}
           />
         );
       })}
