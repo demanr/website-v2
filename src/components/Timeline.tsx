@@ -33,35 +33,6 @@ const MAX_TILT_DEG = 15;
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
 const WAKE_GREY = '#B9CAD2';
 
-// Lower hull boundary from the bow tip down to the bottom, used to keep the
-// bow bubbles hugging the edge as speed grows.
-const HULL_EDGE: Array<[number, number]> = [
-  [163, 32],
-  [160.5, 38],
-  [157, 44],
-  [151, 48.5],
-  [143, 51.5],
-  [132, 53.5],
-  [116, 55],
-  [96, 55.8],
-  [76, 56],
-  [54, 55.7],
-];
-
-function hullBottomAtX(x: number) {
-  for (let i = 0; i < HULL_EDGE.length - 1; i++) {
-    const [x1, y1] = HULL_EDGE[i];
-    const [x2, y2] = HULL_EDGE[i + 1];
-    const minX = Math.min(x1, x2);
-    const maxX = Math.max(x1, x2);
-    if (x >= minX && x <= maxX) {
-      const t = (x - x1) / (x2 - x1);
-      return y1 + (y2 - y1) * t;
-    }
-  }
-  return HULL_EDGE[HULL_EDGE.length - 1][1];
-}
-
 function monthsBetween(a: Date, b: Date): number {
   return (
     (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth())
@@ -72,33 +43,37 @@ function formatDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-function BowWake({ scale, phase }: { scale: number; phase: number }) {
-  if (scale <= 0.01) return null;
+function BowWake({
+  scale,
+  phase,
+  lineY,
+}: {
+  scale: number;
+  phase: number;
+  lineY: number;
+}) {
   const k = Math.min(1, scale * 1.35);
-  const farX = 157;
-  const farY = 44;
-  const rightX = farX - 53 * k;
-  const rightY = hullBottomAtX(rightX);
-  const topY = rightY - (3 + 10 * k);
+  const bowX = BOAT_LEFT_PAD + 159;
+  const rightX = BOAT_LEFT_PAD + (157 - 53 * k);
+  const topY = lineY - (3 + 10 * k);
 
   const bubbles: JSX.Element[] = [];
   let key = 0;
 
-  // Bottom edge: dense bubbles following the hull's bottom line.
+  // Bottom edge: bubbles sitting on the timeline itself.
   const bottomCount = 30;
   for (let i = 0; i < bottomCount; i++) {
     const f = i / (bottomCount - 1);
-    const x = rightX + (farX - rightX) * f;
-    const y = hullBottomAtX(x);
+    const x = rightX + (bowX - rightX) * f;
     const jx = Math.sin(i * 2.2 + phase * 1.1) * 0.8;
-    const jy = 0.8 + ((i * 5) % 4) * 0.35 + Math.cos(i * 1.7 + phase) * 0.5;
+    const jy = Math.cos(i * 1.7 + phase) * 0.7;
     const r = 0.65 + (0.5 + 0.5 * Math.sin(i * 1.9)) * (0.7 + 1.0 * k);
     const op = (0.6 - 0.15 * f) * k * (0.8 + 0.2 * Math.sin(phase * 1.4 + i));
     bubbles.push(
       <circle
         key={key++}
         cx={x + jx}
-        cy={y + jy}
+        cy={lineY + jy}
         r={Math.max(0.4, r)}
         fill={WAKE_GREY}
         opacity={op}
@@ -106,13 +81,12 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
     );
   }
 
-  // Sloped top edge: curved, fading gradually toward the bow.
+  // Sloped top edge: curved and fading toward the bow contact point.
   const topCount = 20;
   for (let i = 0; i < topCount; i++) {
     const f = i / (topCount - 1);
-    const x = rightX + (farX - rightX) * f;
-    const y =
-      topY + (farY - topY) * f - Math.sin(Math.PI * f) * 1.6 * k + 0.3;
+    const x = rightX + (bowX - rightX) * f;
+    const y = topY + (lineY - topY) * f - Math.sin(Math.PI * f) * 1.6 * k;
     const jx = Math.sin(i * 1.9 + phase * 1.3) * 0.8;
     const r = 0.6 + (0.5 + 0.5 * Math.sin(i * 2.3)) * (0.6 + 0.9 * k);
     const op = (0.5 - 0.2 * f) * k;
@@ -128,11 +102,11 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
     );
   }
 
-  // Vertical edge at the right angle, fading upward.
+  // Vertical edge at the right angle, fading upward from the line.
   const vertCount = 9;
   for (let i = 0; i < vertCount; i++) {
     const f = i / (vertCount - 1);
-    const y = rightY - (rightY - topY) * f;
+    const y = lineY - (lineY - topY) * f;
     const x = rightX + Math.sin(i * 2.7 + phase) * 0.7;
     const r = 0.6 + (0.4 + 0.4 * Math.sin(i * 1.7)) * (0.6 + 0.8 * k);
     const op = (0.45 - 0.25 * f) * k;
@@ -148,17 +122,15 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
     );
   }
 
-  // Sparse interior bubbles, thinning toward the top and the bow.
+  // Sparse interior bubbles thinning toward the top and the bow.
   const rows = 4;
   const cols = 8;
   for (let row = 1; row <= rows; row++) {
     const g = row / (rows + 1);
     for (let col = 0; col < cols; col++) {
       const f = (col + 0.5) / cols;
-      const x = rightX + (farX - rightX) * f;
-      const bottom = hullBottomAtX(x);
-      const top = topY + (farY - topY) * f;
-      const y = bottom - (bottom - top) * g;
+      const x = rightX + (bowX - rightX) * f;
+      const y = lineY - (lineY - topY) * g;
       const jx = Math.sin(col * 3.1 + row * 1.7 + phase) * 1.1;
       const jy = Math.cos(col * 1.9 + row * 2.3 + phase) * 0.7;
       const r = 0.55 + (0.4 + 0.4 * Math.sin(col * 1.3 + row)) * k;
@@ -708,6 +680,15 @@ function DesktopTimeline() {
                   );
                 }
 
+                els.push(
+                  <BowWake
+                    key="bow"
+                    scale={wakeScale}
+                    phase={wakePhase}
+                    lineY={lineY}
+                  />,
+                );
+
                 return <g>{els}</g>;
               })()}
             </svg>
@@ -736,7 +717,6 @@ function DesktopTimeline() {
               }}
             >
               <PrincecraftBoat />
-              <BowWake scale={wakeScale} phase={wakePhase} />
             </svg>
           </div>
 
