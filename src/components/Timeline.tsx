@@ -268,6 +268,7 @@ function DesktopTimeline() {
   const [windowWidth, setWindowWidth] = useState(600);
   const [tiltAngle, setTiltAngle] = useState(0);
   const [wakeScale, setWakeScale] = useState(0);
+  const [wakePhase, setWakePhase] = useState(0);
   const [dateText, setDateText] = useState('');
   const lastScrollRef = useRef(0);
   const lastTimeRef = useRef(0);
@@ -380,6 +381,9 @@ function DesktopTimeline() {
 
       setTiltAngle(currentTiltRef.current);
       setWakeScale(currentWakeRef.current);
+      if (currentWakeRef.current > 0.01) {
+        setWakePhase((phase) => (phase + 0.16) % (Math.PI * 2));
+      }
       animFrameRef.current = requestAnimationFrame(loop);
     };
     animFrameRef.current = requestAnimationFrame(loop);
@@ -515,31 +519,114 @@ function DesktopTimeline() {
               }}
             >
               <defs>
-                <filter id="wake-blur" x="-30%" y="-30%" width="160%" height="160%">
-                  <feGaussianBlur stdDeviation="4" />
+                <filter id="wake-soft" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.5" />
                 </filter>
-                <filter id="wake-blur-lg" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="7" />
+                <filter id="wake-glow" x="-60%" y="-60%" width="220%" height="220%">
+                  <feGaussianBlur stdDeviation="6" />
                 </filter>
+                <linearGradient
+                  id="wake-trail"
+                  gradientUnits="userSpaceOnUse"
+                  x1="84"
+                  y1="0"
+                  x2="-70"
+                  y2="0"
+                >
+                  <stop offset="0" stopColor="white" stopOpacity=".25" />
+                  <stop offset="1" stopColor="white" stopOpacity="0" />
+                </linearGradient>
               </defs>
               {(() => {
-                // The stream trails from the back of the motor, to the left.
-                const sternX = BOAT_LEFT_PAD + 4.5;
                 const waterlineY = boatTop + BOAT_HULL_BOTTOM;
-                const len = WAKE_LEN * Math.max(wakeScale, peakWakeRef.current);
-                const dispY = wakeScale;
+                const disp = wakeScale;
+                const phase = wakePhase;
+                const sternX = BOAT_LEFT_PAD + 3.5;
+                const bowX = BOAT_LEFT_PAD + 158;
                 const els: JSX.Element[] = [];
                 let k = 0;
 
-                const count = 22;
-                for (let i = 0; i < count; i++) {
-                  const t = i / (count - 1);
-                  const x = sternX - t * len;
-                  const fade = Math.pow(1 - t, 1.3);
+                // Soft water disturbance under the motor.
+                els.push(
+                  <ellipse
+                    key={k++}
+                    cx={sternX - 12}
+                    cy={waterlineY}
+                    rx={28}
+                    ry={4}
+                    fill="white"
+                    opacity={0.16 * disp}
+                    filter="url(#wake-glow)"
+                  />,
+                );
+
+                // Fading foam band directly behind the motor.
+                els.push(
+                  <rect
+                    key={k++}
+                    x={-70}
+                    y={waterlineY - 3}
+                    width={154}
+                    height={6}
+                    fill="url(#wake-trail)"
+                    opacity={disp}
+                  />,
+                );
+
+                // Two crisp edges trailing back into a widening stream.
+                els.push(
+                  <path
+                    key={k++}
+                    d={`M ${sternX + 2} ${waterlineY - 1} C ${
+                      sternX - 26
+                    } ${waterlineY - 6}, ${sternX - 64} ${
+                      waterlineY - 6
+                    }, ${sternX - 120} ${waterlineY - 1}`}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                    opacity={0.65 * disp}
+                  />,
+                );
+                els.push(
+                  <path
+                    key={k++}
+                    d={`M ${sternX + 2} ${waterlineY + 3} C ${
+                      sternX - 28
+                    } ${waterlineY + 8}, ${sternX - 76} ${
+                      waterlineY + 9
+                    }, ${sternX - 136} ${waterlineY + 4}`}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={1.4}
+                    strokeLinecap="round"
+                    opacity={0.5 * disp}
+                  />,
+                );
+                els.push(
+                  <path
+                    key={k++}
+                    d={`M ${sternX} ${waterlineY + 1} C ${
+                      sternX - 40
+                    } ${waterlineY + 2}, ${sternX - 90} ${
+                      waterlineY + 4
+                    }, ${sternX - 160} ${waterlineY + 4}`}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={1}
+                    opacity={0.25 * disp}
+                  />,
+                );
+
+                // Foam bubbles along the stream.
+                for (let i = 0; i < 12; i++) {
+                  const t = i / 11;
+                  const x = sternX - 4 - t * 120;
                   const y =
                     waterlineY +
-                    Math.sin(i * 2.1 + 0.4) * (1.2 + t * 2.6) * dispY;
-                  const r = 3.5 + t * 9 + Math.sin(i * 1.7) * 1.8;
+                    Math.sin(i * 1.9 + phase * 1.3) * (1.2 + t * 3.2) * disp;
+                  const r = 1.3 + t * 2.2;
                   els.push(
                     <circle
                       key={k++}
@@ -547,31 +634,18 @@ function DesktopTimeline() {
                       cy={y}
                       r={r}
                       fill="white"
-                      opacity={fade * 0.5 * wakeScale}
-                      filter="url(#wake-blur-lg)"
+                      opacity={(0.5 - t * 0.28) * disp}
                     />,
                   );
-                  if (i % 3 === 0) {
-                    els.push(
-                      <circle
-                        key={k++}
-                        cx={x + r * 0.45}
-                        cy={y - r * 0.35}
-                        r={r * 0.55}
-                        fill="white"
-                        opacity={fade * 0.3 * wakeScale}
-                        filter="url(#wake-blur)"
-                      />,
-                    );
-                  }
                 }
 
-                // Dense churn right behind the motor.
+                // Churn right at the motor.
                 for (let i = 0; i < 7; i++) {
-                  const t = i / 7;
-                  const x = sternX - t * 26;
-                  const y = waterlineY + Math.sin(i * 2.4) * 3 * dispY;
-                  const r = 4 + t * 3;
+                  const t = i / 6;
+                  const x = sternX - 2 - t * 20;
+                  const y =
+                    waterlineY + Math.sin(i * 2.1 + phase * 1.8) * 3 * disp;
+                  const r = 2.6 - t * 0.9;
                   els.push(
                     <circle
                       key={k++}
@@ -579,8 +653,107 @@ function DesktopTimeline() {
                       cy={y}
                       r={r}
                       fill="white"
-                      opacity={0.4 * (1 - t) * wakeScale}
-                      filter="url(#wake-blur)"
+                      opacity={(0.7 - t * 0.35) * disp}
+                      filter="url(#wake-soft)"
+                    />,
+                  );
+                }
+
+                // Bow splash: a filled spray wedge with a crisp crest.
+                const splashPath = `M ${bowX - 4} ${waterlineY + 2} Q ${
+                  bowX + 12
+                } ${waterlineY - 14 * disp}, ${bowX + 30} ${
+                  waterlineY - 2 * disp
+                } T ${bowX + 54} ${waterlineY + 3}`;
+                els.push(
+                  <path
+                    key={k++}
+                    d={`${splashPath} Z`}
+                    fill="white"
+                    opacity={0.09 * disp}
+                  />,
+                );
+                els.push(
+                  <path
+                    key={k++}
+                    d={splashPath}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    opacity={0.85 * disp}
+                  />,
+                );
+
+                // Two spray arcs above the crest.
+                els.push(
+                  <path
+                    key={k++}
+                    d={`M ${bowX + 2} ${waterlineY - 1} Q ${bowX + 12} ${
+                      waterlineY - 14 * disp
+                    }, ${bowX + 24} ${waterlineY - 17 * disp}`}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={1.3}
+                    strokeLinecap="round"
+                    opacity={0.55 * disp}
+                  />,
+                );
+                els.push(
+                  <path
+                    key={k++}
+                    d={`M ${bowX + 8} ${waterlineY - 1} Q ${bowX + 20} ${
+                      waterlineY - 9 * disp
+                    }, ${bowX + 36} ${waterlineY - 7 * disp}`}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth={1.1}
+                    strokeLinecap="round"
+                    opacity={0.4 * disp}
+                  />,
+                );
+
+                // Droplets flicked up at the bow.
+                for (let i = 0; i < 9; i++) {
+                  const t = (i + 1) / 10;
+                  const rise = Math.abs(Math.sin(phase * 1.8 + i * 1.2));
+                  const x = bowX + 6 + t * 28 + Math.sin(phase + i) * 2;
+                  const y = waterlineY - 2 - rise * (6 + t * 16) * disp;
+                  const r = 1.1 + t * 1.6;
+                  els.push(
+                    <circle
+                      key={k++}
+                      cx={x}
+                      cy={y}
+                      r={r}
+                      fill="white"
+                      opacity={(0.75 - t * 0.3) * disp}
+                    />,
+                  );
+                }
+
+                // Foam at the bow waterline.
+                els.push(
+                  <ellipse
+                    key={k++}
+                    cx={bowX + 14}
+                    cy={waterlineY + 1}
+                    rx={26}
+                    ry={3}
+                    fill="white"
+                    opacity={0.16 * disp}
+                    filter="url(#wake-glow)"
+                  />,
+                );
+                for (let i = 0; i < 4; i++) {
+                  els.push(
+                    <circle
+                      key={k++}
+                      cx={bowX + 10 + i * 7}
+                      cy={waterlineY + Math.sin(i + phase) * 1.5}
+                      r={1.6 + i * 0.4}
+                      fill="white"
+                      opacity={0.6 * disp}
                     />,
                   );
                 }
