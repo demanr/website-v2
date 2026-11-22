@@ -31,6 +31,7 @@ const MOBILE_TOP_PAD = 28;
 const MAX_TILT_DEG = 15;
 
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
+const WAKE_GREY = '#B9CAD2';
 
 function monthsBetween(a: Date, b: Date): number {
   return (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
@@ -51,16 +52,6 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
   const outer = `M ${startX} ${startY} C ${startX - 6 - 12 * k} ${
     startY - 2 - 8 * k
   }, ${startX - 16 - 22 * k} ${startY - 3 - 10 * k}, ${reachX} ${reachY}`;
-  const mid = `M ${startX - 1} ${startY - 0.5} C ${
-    startX - 6 - 8 * k
-  } ${startY - 2 - 4 * k}, ${startX - 9 - 14 * k} ${
-    startY - 2.5 - 5 * k
-  }, ${startX - (10 + 20 * k)} ${startY - (2 + 6 * k)}`;
-  const low = `M ${startX - 2} ${startY - 1} C ${
-    startX - 7 - 6 * k
-  } ${startY - 3 - 2 * k}, ${startX - 10 - 10 * k} ${
-    startY - 3.5 - 2.5 * k
-  }, ${startX - (8 + 12 * k)} ${startY - (1 + 3 * k)}`;
   const sheet = `${outer} C ${reachX + 8} ${reachY + 6}, ${
     startX - 4
   } ${startY - 1}, ${startX} ${startY} Z`;
@@ -68,30 +59,6 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
   return (
     <g pointerEvents="none">
       <path d={sheet} fill="#DCE8EC" fillOpacity={0.14 * k} />
-      <path
-        d={outer}
-        fill="none"
-        stroke="#fff"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        opacity={Math.min(1, k * 1.3)}
-      />
-      <path
-        d={mid}
-        fill="none"
-        stroke="#fff"
-        strokeWidth={1.3}
-        strokeLinecap="round"
-        opacity={Math.min(0.8, k * 1.1)}
-      />
-      <path
-        d={low}
-        fill="none"
-        stroke="#fff"
-        strokeWidth={1}
-        strokeLinecap="round"
-        opacity={Math.min(0.55, k * 0.9)}
-      />
       {Array.from({ length: 9 }).map((_, i) => {
         const t = (i + 1) / 10;
         const rise = Math.abs(Math.sin(phase * 1.8 + i * 1.1));
@@ -105,8 +72,8 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
             cx={x}
             cy={y}
             r={r}
-            fill="#fff"
-            opacity={(0.8 - t * 0.25) * k}
+            fill={WAKE_GREY}
+            opacity={(0.6 - t * 0.2) * k}
           />
         );
       })}
@@ -115,8 +82,8 @@ function BowWake({ scale, phase }: { scale: number; phase: number }) {
         cy={55}
         rx={6 + 5 * k}
         ry={1.5}
-        fill="#fff"
-        opacity={0.18 * k}
+        fill={WAKE_GREY}
+        opacity={0.16 * k}
       />
     </g>
   );
@@ -607,7 +574,7 @@ function DesktopTimeline() {
                   x2="-70"
                   y2="0"
                 >
-                  <stop offset="0" stopColor="white" stopOpacity=".25" />
+                  <stop offset="0" stopColor={WAKE_GREY} stopOpacity=".22" />
                   <stop offset="1" stopColor="white" stopOpacity="0" />
                 </linearGradient>
               </defs>
@@ -638,41 +605,9 @@ function DesktopTimeline() {
                     cy={waterlineY}
                     rx={26}
                     ry={4}
-                    fill="white"
-                    opacity={0.14 * disp}
+                    fill={WAKE_GREY}
+                    opacity={0.16 * disp}
                     filter="url(#wake-glow)"
-                  />,
-                );
-
-                // Diverging wake edges.
-                els.push(
-                  <path
-                    key={k++}
-                    d={`M ${sternX + 2} ${waterlineY - 1} C ${
-                      sternX - 26
-                    } ${waterlineY - 7}, ${sternX - 64} ${
-                      waterlineY - 6
-                    }, ${sternX - 120} ${waterlineY - 1}`}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    opacity={0.75 * disp}
-                  />,
-                );
-                els.push(
-                  <path
-                    key={k++}
-                    d={`M ${sternX + 2} ${waterlineY + 3} C ${
-                      sternX - 28
-                    } ${waterlineY + 8}, ${sternX - 76} ${
-                      waterlineY + 9
-                    }, ${sternX - 136} ${waterlineY + 4}`}
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    opacity={0.65 * disp}
                   />,
                 );
 
@@ -696,11 +631,37 @@ function DesktopTimeline() {
                       cx={x}
                       cy={y}
                       r={r}
-                      fill="white"
-                      opacity={(0.55 - i * 0.05) * disp}
+                      fill={WAKE_GREY}
+                      opacity={(0.5 - i * 0.05) * disp}
                       filter="url(#wake-soft)"
                     />,
                   );
+                }
+
+                // Scattered bubbles trailing off, not a straight row.
+                const clusters = [
+                  [-14, -2],
+                  [-30, 2],
+                  [-48, 0],
+                ];
+                for (let c = 0; c < clusters.length; c++) {
+                  const [cx, cy] = clusters[c];
+                  const n = 4 - Math.min(c, 2);
+                  for (let b = 0; b < n; b++) {
+                    const a = (b / n) * Math.PI * 2 + phase * 0.6 + c;
+                    const rr = 1.2 + (b % 3) * 0.7;
+                    els.push(
+                      <circle
+                        key={k++}
+                        cx={sternX + cx + Math.cos(a) * (3 + b)}
+                        cy={waterlineY + cy + Math.sin(a) * (2 + c)}
+                        r={rr}
+                        fill={WAKE_GREY}
+                        opacity={(0.4 - c * 0.08) * disp}
+                        filter="url(#wake-soft)"
+                      />,
+                    );
+                  }
                 }
 
                 // A few droplets above the stern splash.
@@ -716,8 +677,8 @@ function DesktopTimeline() {
                       cx={x}
                       cy={y}
                       r={r}
-                      fill="white"
-                      opacity={(0.6 - t * 0.2) * disp}
+                      fill={WAKE_GREY}
+                      opacity={(0.55 - t * 0.18) * disp}
                     />,
                   );
                 }
