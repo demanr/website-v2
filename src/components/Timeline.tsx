@@ -494,8 +494,6 @@ function DesktopTimeline() {
 
     if (shownRef.current === want) {
       setFocusBoth(1);
-    } else if (swapTimerRef.current !== null) {
-      // a fade-out and text swap is already on its way; let it finish
     } else if (focusRef.current === 0) {
       // nothing showing: switch text and fade in
       shownRef.current = want;
