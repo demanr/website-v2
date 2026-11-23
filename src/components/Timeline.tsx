@@ -445,15 +445,21 @@ function DesktopTimeline() {
     setDateText(formatDate(currentDate));
 
     const boatCenter = boatLeft + boatW / 2 - sectionRect.left;
-    // Zone for each position: a little before the dot, and further past it
-    // in the direction of travel, so the text stays up a bit after the boat passes.
-    const zoneBefore = 60 * bs;
-    const zoneAfter = 100 * bs;
-    const offsetOf = (i: number) =>
-      boatCenter - (boatAndGapWidth + cumulativeMonths[i] * spacingPerMonth);
+    // Each position's zone: on each side, the larger of a fixed minimum and
+    // 40% of the distance to the neighbouring position on that side.
+    const dotXs = cumulativeMonths.map((m) => boatAndGapWidth + m * spacingPerMonth);
+    const offsetOf = (i: number) => boatCenter - dotXs[i];
     const inZone = (i: number) => {
       const d = offsetOf(i);
-      return d > -zoneBefore && d < zoneAfter;
+      const before = Math.max(
+        60 * bs,
+        i > 0 ? 0.4 * (dotXs[i] - dotXs[i - 1]) : 0,
+      );
+      const after = Math.max(
+        100 * bs,
+        i < dotXs.length - 1 ? 0.4 * (dotXs[i + 1] - dotXs[i]) : 0,
+      );
+      return d > -before && d < after;
     };
 
     // Keep the current position's text while the boat is still in its zone.
