@@ -59,7 +59,7 @@ function BowWake({
   phase: number;
   lineY: number;
 }) {
-  const k = Math.min(1, scale * 1.35);
+  const k = Math.min(1, scale * 1.7);
   if (k <= 0.01) return null;
 
   const L = lineY;
