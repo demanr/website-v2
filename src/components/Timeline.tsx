@@ -341,6 +341,7 @@ function DesktopTimeline() {
   const [wakePhase, setWakePhase] = useState(0);
   const [dateText, setDateText] = useState('');
   const [activeIdx, setActiveIdx] = useState<number>(0);
+  const activeRef = useRef(0);
   const [focus, setFocus] = useState(0);
   const [vizScale, setVizScale] = useState(1);
   const [vizScrollX, setVizScrollX] = useState(0);
@@ -432,7 +433,7 @@ function DesktopTimeline() {
 
     const scrolledFromBoat = Math.max(0, -sectionRect.left);
     setVizScrollX(scrolledFromBoat);
-    setVizScale(Math.min(1.4, Math.max(1, 1 + scrolledFromBoat / 200)));
+    setVizScale(Math.min(1.3, Math.max(1, 1 + scrolledFromBoat / 1000)));
 
     const svgXAtBoat = boatLeft - sectionRect.left;
     const progress = Math.max(0, Math.min(1, (svgXAtBoat - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
@@ -453,8 +454,22 @@ function DesktopTimeline() {
         nearest = i;
       }
     });
-    if (nearest !== null) setActiveIdx(nearest);
-    setFocus(nearestDist < 32 * bs ? 1 : 0);
+    // Keep the current position's text while the boat is still inside its
+    // zone, so overlapping zones don't swap the text while it is showing.
+    const zone = 60 * bs;
+    const current = activeRef.current;
+    const currentDist = Math.abs(
+      boatCenter - (boatAndGapWidth + cumulativeMonths[current] * spacingPerMonth),
+    );
+    if (currentDist < zone) {
+      setFocus(1);
+    } else if (nearest !== null && nearestDist < zone) {
+      activeRef.current = nearest;
+      setActiveIdx(nearest);
+      setFocus(1);
+    } else {
+      setFocus(0);
+    }
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
 
   useEffect(() => {
@@ -535,7 +550,7 @@ function DesktopTimeline() {
           width: totalWidth,
           height: svgHeight,
           transform: `scale(${vizScale})`,
-          transformOrigin: `${vizScrollX + boatLeft}px ${lineY}px`,
+          transformOrigin: `${vizScrollX + boatLeft}px ${svgHeight}px`,
         }}
       >
       <svg
@@ -620,7 +635,7 @@ function DesktopTimeline() {
           style={{
             position: 'absolute',
             left: tick.x,
-            top: yearTop ?? svgHeight - 36,
+            top: svgHeight + ((yearTop ?? svgHeight - 36) - svgHeight) / vizScale,
             transform: 'translateX(-50%)',
             color: 'white',
             fontSize: 14 * bs,
