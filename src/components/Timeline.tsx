@@ -28,7 +28,7 @@ const MOBILE_DIAG_ANGLE_RAD = (25 * Math.PI) / 180;
 const MOBILE_SPACING_PER_MONTH = 16;
 const MOBILE_TOP_PAD = 28;
 
-const MAX_TILT_DEG = 15;
+const MAX_TILT_DEG = 2;
 
 const FONT_FAMILY = 'Red Hat Display, Inter, sans-serif';
 const WAKE_GREY = '#B9CAD2';
@@ -409,7 +409,7 @@ function DesktopTimeline() {
       const v = dScroll / dt;
       const SMOOTHING = 0.12;
       velocityRef.current = velocityRef.current + (v - velocityRef.current) * SMOOTHING;
-      const targetTilt = -Math.min(velocityRef.current * 6, MAX_TILT_DEG);
+      const targetTilt = -Math.min(velocityRef.current * 1.5, MAX_TILT_DEG);
       const REEMERGE = 0.15;
       currentTiltRef.current += (targetTilt - currentTiltRef.current) * REEMERGE;
       // The wake is about motion, not exact velocity: any meaningful scroll
