@@ -350,7 +350,7 @@ function DesktopTimeline() {
     const update = () => {
       const ww = window.innerWidth;
       setWindowWidth(ww);
-      setSpacingPerMonth(ww / 24);
+      setSpacingPerMonth(ww / 36);
       setBoatScale(
         Math.min(1.8, Math.max(1, Math.min(ww / 1440, window.innerHeight / 800))),
       );
@@ -464,6 +464,16 @@ function DesktopTimeline() {
   }, []);
 
   const totalWidth = boatAndGapWidth + timelineWidth;
+
+  const yearTicks: { year: number; x: number }[] = [];
+  if (positions.length > 0) {
+    const newest = positions[0].startDate;
+    const oldestYear = positions[positions.length - 1].startDate.getFullYear();
+    for (let y = newest.getFullYear(); y >= oldestYear; y--) {
+      const m = monthsBetween(newest, new Date(y, 0, 1));
+      yearTicks.push({ year: y, x: boatAndGapWidth + m * spacingPerMonth });
+    }
+  }
   const lineEndX = timelineWidth;
   const markerSize = 10;
 
@@ -557,6 +567,24 @@ function DesktopTimeline() {
           );
         })}
       </svg>
+
+      {yearTicks.map((tick) => (
+        <div
+          key={tick.year}
+          style={{
+            position: 'absolute',
+            left: tick.x,
+            top: svgHeight - 36,
+            transform: 'translateX(-50%)',
+            color: 'white',
+            fontSize: 14 * bs,
+            fontFamily: FONT_FAMILY,
+            opacity: 0.85,
+          }}
+        >
+          {tick.year}
+        </div>
+      ))}
 
       <div
         className="sticky top-0 left-0 z-20"
