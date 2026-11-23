@@ -340,7 +340,8 @@ function DesktopTimeline() {
   const [wakeScale, setWakeScale] = useState(0);
   const [wakePhase, setWakePhase] = useState(0);
   const [dateText, setDateText] = useState('');
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const [focus, setFocus] = useState(0);
   const lastScrollRef = useRef(0);
   const lastTimeRef = useRef(0);
   const velocityRef = useRef(0);
@@ -447,7 +448,9 @@ function DesktopTimeline() {
         nearest = i;
       }
     });
-    setActiveIdx(nearest !== null && nearestDist < 14 * bs ? nearest : null);
+    if (nearest !== null) setActiveIdx(nearest);
+    const reach = 40 * bs;
+    setFocus(Math.max(0, 1 - nearestDist / reach));
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
 
   useEffect(() => {
@@ -617,27 +620,28 @@ function DesktopTimeline() {
         style={{ width: boatAndGapWidth, height: svgHeight }}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          {activeIdx !== null && (
-            <div
-              style={{
-                position: 'absolute',
-                left: boatLeft,
-                top: boatTop - 30 * bs,
-                transform: 'translateY(-100%)',
-                width: 240 * bs,
-                color: 'white',
-                fontFamily: FONT_FAMILY,
-                fontSize: 13 * bs,
-                lineHeight: 1.35,
-                pointerEvents: 'none',
-              }}
-            >
-              <div style={{ fontWeight: 700 }}>
-                {positions[activeIdx].company} · {positions[activeIdx].title}
-              </div>
-              <div style={{ opacity: 0.8 }}>{positions[activeIdx].description}</div>
+          <div
+            style={{
+              position: 'absolute',
+              left: boatLeft,
+              top: boatTop - 34 * bs,
+              transform: 'translateY(-100%)',
+              width: 380 * bs,
+              color: 'white',
+              fontFamily: FONT_FAMILY,
+              lineHeight: 1.4,
+              pointerEvents: 'none',
+              opacity: focus,
+              transition: 'opacity 0.35s ease-out',
+            }}
+          >
+            <div style={{ fontSize: 20 * bs, fontWeight: 700 }}>
+              {positions[activeIdx].company} · {positions[activeIdx].title}
             </div>
-          )}
+            <div style={{ fontSize: 16 * bs, opacity: 0.85, marginTop: 4 * bs }}>
+              {positions[activeIdx].description}
+            </div>
+          </div>
           <div
             style={{
               position: 'absolute',
