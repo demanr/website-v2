@@ -655,8 +655,14 @@ function DesktopTimeline() {
       ))}
 
       <div
-        className="sticky top-0 left-0 z-20"
-        style={{ width: boatAndGapWidth, height: svgHeight }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: vizScrollX,
+          zIndex: 20,
+          width: boatAndGapWidth,
+          height: svgHeight,
+        }}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
           <div
