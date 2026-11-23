@@ -335,6 +335,7 @@ function DesktopTimeline() {
   const [spacingPerMonth, setSpacingPerMonth] = useState(0);
   const [windowWidth, setWindowWidth] = useState(600);
   const [boatScale, setBoatScale] = useState(1);
+  const [yearTop, setYearTop] = useState<number | null>(null);
   const [tiltAngle, setTiltAngle] = useState(0);
   const [wakeScale, setWakeScale] = useState(0);
   const [wakePhase, setWakePhase] = useState(0);
@@ -354,6 +355,13 @@ function DesktopTimeline() {
       setBoatScale(
         Math.min(1.8, Math.max(1, Math.min(ww / 1440, window.innerHeight / 800))),
       );
+      const footer = document.getElementById('desktop-footer');
+      const section = sectionRef.current;
+      if (footer && section) {
+        const offset =
+          footer.getBoundingClientRect().top - section.getBoundingClientRect().top;
+        setYearTop(offset - 30 * Math.min(1.8, Math.max(1, Math.min(ww / 1440, window.innerHeight / 800))));
+      }
     };
     update();
     window.addEventListener('resize', update);
@@ -574,7 +582,7 @@ function DesktopTimeline() {
           style={{
             position: 'absolute',
             left: tick.x,
-            top: svgHeight - 36,
+            top: yearTop ?? svgHeight - 36,
             transform: 'translateX(-50%)',
             color: 'white',
             fontSize: 14 * bs,

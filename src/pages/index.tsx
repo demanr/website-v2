@@ -283,7 +283,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-0 hidden w-full bg-black md:block">
+      <div id="desktop-footer" className="absolute bottom-0 hidden w-full bg-black md:block">
         <BottomBar />
       </div>
     </div>
