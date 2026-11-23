@@ -53,102 +53,145 @@ function BowWake({
   lineY: number;
 }) {
   const k = Math.min(1, scale * 1.35);
-  const bowX = BOAT_LEFT_PAD + 159;
-  const rightX = BOAT_LEFT_PAD + (157 - 53 * k);
-  const topY = lineY - (3 + 10 * k);
+  if (k <= 0.01) return null;
 
-  const bubbles: JSX.Element[] = [];
+  // Contact point: where the hull's bottom starts curving up toward the bow.
+  const contactX = BOAT_LEFT_PAD + 134;
+  const L = lineY;
+  const reach = 14 + 50 * k;
+  const height = (3 + 15 * k) * (1 + 0.1 * Math.sin(phase * 1.3));
+
+  // Crest height profile along the wave: rises from the contact, peaks just
+  // ahead of the bow, then sweeps back and falls off gradually.
+  const crestH = (t: number) => {
+    const rise = t < 0.14 ? t / 0.14 : Math.pow((1 - t) / 0.86, 1.5);
+    return height * rise;
+  };
+  const crestX = (t: number) => contactX + 4 - (reach + 4) * t;
+  const crestPt = (t: number) => ({ x: crestX(t), y: L - crestH(t) });
+
+  const out: JSX.Element[] = [];
   let key = 0;
 
-  // Bottom edge: bubbles sitting on the timeline itself.
-  const bottomCount = 30;
-  for (let i = 0; i < bottomCount; i++) {
-    const f = i / (bottomCount - 1);
-    const x = rightX + (bowX - rightX) * f;
-    const jx = Math.sin(i * 2.2 + phase * 1.1) * 0.8;
-    const jy = Math.cos(i * 1.7 + phase) * 0.7;
-    const r = 0.65 + (0.5 + 0.5 * Math.sin(i * 1.9)) * (0.7 + 1.0 * k);
-    const op = (0.6 - 0.15 * f) * k * (0.8 + 0.2 * Math.sin(phase * 1.4 + i));
-    bubbles.push(
+  // Faint body of the wave so the bubbles read as one shape.
+  const outline: string[] = [];
+  for (let i = 0; i <= 40; i++) {
+    const p = crestPt(i / 40);
+    outline.push(`${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`);
+  }
+  outline.push(`L ${(contactX - reach).toFixed(2)} ${L.toFixed(2)}`);
+  outline.push(`L ${(contactX + 4).toFixed(2)} ${L.toFixed(2)} Z`);
+  out.push(
+    <path
+      key={key++}
+      d={outline.join(' ')}
+      fill={WAKE_GREY}
+      opacity={0.07 * k}
+    />,
+  );
+
+  // Dense bubbles along the crest.
+  const crestCount = 42;
+  for (let i = 0; i < crestCount; i++) {
+    const t = i / (crestCount - 1);
+    const p = crestPt(t);
+    const jit = Math.sin(i * 2.7 + phase * 1.4) * 0.7;
+    const r = 0.6 + (0.45 + 0.4 * Math.sin(i * 1.9)) * (0.6 + 0.9 * k);
+    const op = (0.75 - 0.5 * t) * k * (0.85 + 0.15 * Math.sin(phase * 2 + i));
+    out.push(
       <circle
         key={key++}
-        cx={x + jx}
-        cy={lineY + jy}
+        cx={p.x + jit * 0.4}
+        cy={p.y - Math.abs(jit)}
         r={Math.max(0.4, r)}
         fill={WAKE_GREY}
-        opacity={op}
+        opacity={Math.max(0, op)}
       />,
     );
   }
 
-  // Sloped top edge: curved and fading toward the bow contact point.
-  const topCount = 20;
-  for (let i = 0; i < topCount; i++) {
-    const f = i / (topCount - 1);
-    const x = rightX + (bowX - rightX) * f;
-    const y = topY + (lineY - topY) * f - Math.sin(Math.PI * f) * 1.6 * k;
-    const jx = Math.sin(i * 1.9 + phase * 1.3) * 0.8;
-    const r = 0.6 + (0.5 + 0.5 * Math.sin(i * 2.3)) * (0.6 + 0.9 * k);
-    const op = (0.5 - 0.2 * f) * k;
-    bubbles.push(
+  // Secondary, inner crest: a second roll of foam sitting behind the first.
+  const innerCount = 22;
+  for (let i = 0; i < innerCount; i++) {
+    const t = 0.12 + (0.8 * i) / (innerCount - 1);
+    const p = crestPt(t);
+    const r = 0.55 + (0.3 + 0.4 * Math.sin(i * 2.1)) * (0.5 + 0.8 * k);
+    const op = (0.4 - 0.3 * t) * k;
+    out.push(
       <circle
         key={key++}
-        cx={x + jx}
-        cy={y}
-        r={Math.max(0.4, r)}
+        cx={p.x - 2.2 + Math.sin(i + phase) * 0.6}
+        cy={L - crestH(t) * 0.55 + Math.cos(i * 1.7 + phase) * 0.6}
+        r={Math.max(0.35, r)}
         fill={WAKE_GREY}
-        opacity={op}
+        opacity={Math.max(0, op)}
       />,
     );
   }
 
-  // Vertical edge at the right angle, fading upward from the line.
-  const vertCount = 9;
-  for (let i = 0; i < vertCount; i++) {
-    const f = i / (vertCount - 1);
-    const y = lineY - (lineY - topY) * f;
-    const x = rightX + Math.sin(i * 2.7 + phase) * 0.7;
-    const r = 0.6 + (0.4 + 0.4 * Math.sin(i * 1.7)) * (0.6 + 0.8 * k);
-    const op = (0.45 - 0.25 * f) * k;
-    bubbles.push(
+  // Bubbles sitting on the timeline, from the contact back along the wave.
+  const baseCount = 28;
+  for (let i = 0; i < baseCount; i++) {
+    const t = i / (baseCount - 1);
+    const x = contactX + 4 - (reach + 4) * t;
+    const jit = Math.sin(i * 3.3 + phase * 1.1) * 0.6;
+    const r = 0.6 + (0.4 + 0.4 * Math.sin(i * 1.5)) * (0.6 + 0.8 * k);
+    const op = (0.6 - 0.45 * t) * k;
+    out.push(
       <circle
         key={key++}
-        cx={x}
-        cy={y}
+        cx={x + jit}
+        cy={L + 0.8 + Math.cos(i * 1.9 + phase) * 0.5}
         r={Math.max(0.4, r)}
         fill={WAKE_GREY}
-        opacity={op}
+        opacity={Math.max(0, op)}
       />,
     );
   }
 
-  // Sparse interior bubbles thinning toward the top and the bow.
-  const rows = 4;
-  const cols = 8;
-  for (let row = 1; row <= rows; row++) {
-    const g = row / (rows + 1);
-    for (let col = 0; col < cols; col++) {
-      const f = (col + 0.5) / cols;
-      const x = rightX + (bowX - rightX) * f;
-      const y = lineY - (lineY - topY) * g;
-      const jx = Math.sin(col * 3.1 + row * 1.7 + phase) * 1.1;
-      const jy = Math.cos(col * 1.9 + row * 2.3 + phase) * 0.7;
-      const r = 0.55 + (0.4 + 0.4 * Math.sin(col * 1.3 + row)) * k;
-      const op = (0.3 - 0.18 * g) * k * (0.7 + 0.3 * Math.sin(phase + col));
-      bubbles.push(
+  // Sparse interior bubbles filling the wave body, thinning out upward.
+  const rows = [0.25, 0.5, 0.75];
+  const cols = 9;
+  for (let ri = 0; ri < rows.length; ri++) {
+    const g = rows[ri];
+    for (let c = 0; c < cols; c++) {
+      const t = 0.1 + (0.8 * (c + 0.5)) / cols;
+      const x = crestX(t) + Math.sin(c * 3.1 + ri + phase) * 0.9;
+      const y = L - crestH(t) * g + Math.cos(c * 1.9 + ri * 2 + phase) * 0.6;
+      const r = 0.45 + (0.3 + 0.3 * Math.sin(c * 1.3 + ri)) * (0.5 + 0.7 * k);
+      const op = (0.3 - 0.12 * ri) * k * (0.7 + 0.3 * Math.sin(phase + c));
+      out.push(
         <circle
           key={key++}
-          cx={x + jx}
-          cy={y + jy}
+          cx={x}
+          cy={y}
           r={Math.max(0.35, r)}
           fill={WAKE_GREY}
-          opacity={op}
+          opacity={Math.max(0, op)}
         />,
       );
     }
   }
 
-  return <g pointerEvents="none">{bubbles}</g>;
+  // Spray flicked off the crest peak, bouncing up then falling.
+  const peak = crestPt(0.1);
+  for (let i = 0; i < 6; i++) {
+    const rise = Math.abs(Math.sin(phase * 1.7 + i * 1.3));
+    const x = peak.x + 1 + i * 1.6 * k + Math.sin(phase + i) * 0.8;
+    const y = peak.y - rise * (2 + 6 * k) + 0.4 * i;
+    out.push(
+      <circle
+        key={key++}
+        cx={x}
+        cy={y}
+        r={0.6 + 0.4 * k}
+        fill={WAKE_GREY}
+        opacity={0.5 * k * (1 - i / 7)}
+      />,
+    );
+  }
+
+  return <g pointerEvents="none">{out}</g>;
 }
 
 function PrincecraftBoat() {
