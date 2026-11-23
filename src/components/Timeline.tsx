@@ -343,6 +343,14 @@ function DesktopTimeline() {
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const activeRef = useRef(0);
   const [focus, setFocus] = useState(0);
+  const focusRef = useRef(0);
+  const shownRef = useRef(0);
+  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wantRef = useRef<number | null>(null);
+  const setFocusBoth = (v: number) => {
+    focusRef.current = v;
+    setFocus(v);
+  };
   const [vizScale, setVizScale] = useState(1);
   const [vizScrollX, setVizScrollX] = useState(0);
   const lastScrollRef = useRef(0);
@@ -462,31 +470,54 @@ function DesktopTimeline() {
       return d > -before && d < after;
     };
 
-    // Keep the current position's text while the boat is still in its zone.
-    const current = activeRef.current;
-    if (inZone(current)) {
-      setFocus(1);
+    // Work out which position should be shown. Keep the current one while the
+    // boat is still in its zone; otherwise take the nearest zone it's in.
+    let want: number | null = null;
+    if (inZone(activeRef.current)) {
+      want = activeRef.current;
     } else {
-      let found: number | null = null;
       let foundDist = Infinity;
       cumulativeMonths.forEach((_, i) => {
         if (inZone(i) && Math.abs(offsetOf(i)) < foundDist) {
           foundDist = Math.abs(offsetOf(i));
-          found = i;
+          want = i;
         }
       });
-      if (found !== null) {
-        activeRef.current = found;
-        setActiveIdx(found);
-        setFocus(1);
-      } else {
-        setFocus(0);
-      }
+    }
+
+    wantRef.current = want;
+    if (want === null) {
+      setFocusBoth(0);
+      return;
+    }
+    activeRef.current = want;
+
+    if (shownRef.current === want) {
+      setFocusBoth(1);
+    } else if (focusRef.current === 0) {
+      // nothing showing: switch text and fade in
+      shownRef.current = want;
+      setActiveIdx(want);
+      setFocusBoth(1);
+    } else if (swapTimerRef.current === null) {
+      // changing positions while showing: fade out, swap text, fade back in
+      setFocusBoth(0);
+      swapTimerRef.current = setTimeout(() => {
+        swapTimerRef.current = null;
+        if (wantRef.current !== null) {
+          shownRef.current = activeRef.current;
+          setActiveIdx(activeRef.current);
+          setFocusBoth(1);
+        }
+      }, 380);
     }
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
 
   useEffect(() => {
     handleScroll();
+    return () => {
+      if (swapTimerRef.current !== null) clearTimeout(swapTimerRef.current);
+    };
   }, [handleScroll]);
 
   useEffect(() => {
