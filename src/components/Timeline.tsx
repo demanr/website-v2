@@ -448,7 +448,7 @@ function DesktopTimeline() {
       }
     });
     if (nearest !== null) setActiveIdx(nearest);
-    setFocus(nearestDist < 14 * bs ? 1 : 0);
+    setFocus(nearestDist < 32 * bs ? 1 : 0);
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
 
   useEffect(() => {
