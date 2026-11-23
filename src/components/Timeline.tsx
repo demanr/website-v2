@@ -340,6 +340,7 @@ function DesktopTimeline() {
   const [wakeScale, setWakeScale] = useState(0);
   const [wakePhase, setWakePhase] = useState(0);
   const [dateText, setDateText] = useState('');
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const lastScrollRef = useRef(0);
   const lastTimeRef = useRef(0);
   const velocityRef = useRef(0);
@@ -386,8 +387,9 @@ function DesktopTimeline() {
   }, [orderedPositions]);
 
   const totalMonths = cumulativeMonths[cumulativeMonths.length - 1];
-  // extra room after the oldest dot so its label is never clipped
-  const timelineWidth = totalMonths * spacingPerMonth + 120;
+  // extra room after the oldest dot so its label is never clipped, plus a
+  // runway so the pinned boat can scroll all the way onto the oldest position
+  const timelineWidth = totalMonths * spacingPerMonth + 120 + windowWidth;
   const gapWidth = windowWidth / 8;
   const bs = boatScale;
   const boatLeft = BOAT_LEFT_PAD * bs;
@@ -434,7 +436,23 @@ function DesktopTimeline() {
     const dateRange = oldestDate.getTime() - newestDate.getTime();
     const currentDate = new Date(newestDate.getTime() + dateRange * progress);
     setDateText(formatDate(currentDate));
-  }, [boatAndGapWidth, spacingPerMonth, totalMonths]);
+
+    const boatCenter = boatLeft + boatW / 2 - sectionRect.left;
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
+    cumulativeMonths.forEach((m, i) => {
+      const dist = Math.abs(boatCenter - (boatAndGapWidth + m * spacingPerMonth));
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = i;
+      }
+    });
+    setActiveIdx(nearest !== null && nearestDist < 14 * bs ? nearest : null);
+  }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
+
+  useEffect(() => {
+    handleScroll();
+  }, [handleScroll]);
 
   useEffect(() => {
     const container = document.getElementById('home-scroll-desktop');
@@ -599,6 +617,27 @@ function DesktopTimeline() {
         style={{ width: boatAndGapWidth, height: svgHeight }}
       >
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          {activeIdx !== null && (
+            <div
+              style={{
+                position: 'absolute',
+                left: boatLeft,
+                top: boatTop - 30 * bs,
+                transform: 'translateY(-100%)',
+                width: 240 * bs,
+                color: 'white',
+                fontFamily: FONT_FAMILY,
+                fontSize: 13 * bs,
+                lineHeight: 1.35,
+                pointerEvents: 'none',
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>
+                {positions[activeIdx].company} · {positions[activeIdx].title}
+              </div>
+              <div style={{ opacity: 0.8 }}>{positions[activeIdx].description}</div>
+            </div>
+          )}
           <div
             style={{
               position: 'absolute',
