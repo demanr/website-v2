@@ -347,6 +347,7 @@ function DesktopTimeline() {
   const velocityRef = useRef(0);
   const currentTiltRef = useRef(0);
   const currentWakeRef = useRef(0);
+  const wakeTargetRef = useRef(0);
   const animFrameRef = useRef(0);
 
   useEffect(() => {
@@ -423,10 +424,8 @@ function DesktopTimeline() {
       const targetTilt = -Math.min(velocityRef.current * 1.5, MAX_TILT_DEG);
       const REEMERGE = 0.15;
       currentTiltRef.current += (targetTilt - currentTiltRef.current) * REEMERGE;
-      // The wake is about motion, not exact velocity: any meaningful scroll
-      // delta brings it up immediately, then the loop fades it out.
-      const wakeTarget = Math.min(1, dScroll / 10);
-      currentWakeRef.current = Math.max(currentWakeRef.current, wakeTarget);
+      // Target follows scroll speed; small slow scrolls barely register.
+      wakeTargetRef.current = Math.min(1, Math.max(0, (dScroll - 2) / 30));
     }
 
     const svgXAtBoat = boatLeft - sectionRect.left;
@@ -474,7 +473,9 @@ function DesktopTimeline() {
       }
 
       currentTiltRef.current += (0 - currentTiltRef.current) * DECAY_LERP;
-      currentWakeRef.current += (0 - currentWakeRef.current) * DECAY_LERP;
+      // ease toward the scroll-driven target, slowly, in both directions
+      wakeTargetRef.current *= 0.85;
+      currentWakeRef.current += (wakeTargetRef.current - currentWakeRef.current) * 0.07;
 
       if (Math.abs(currentTiltRef.current) < 0.01) currentTiltRef.current = 0;
       if (Math.abs(currentWakeRef.current) < 0.005) {
