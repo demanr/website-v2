@@ -43,6 +43,13 @@ function formatDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
+function wakeRand(i: number) {
+  const x = Math.sin(i * 12.9898 + 7.13) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Bow wake: bubbles thrown from the bow in two tiers, arcing back and falling
+// to the timeline. Coordinates are in boat-local units.
 function BowWake({
   scale,
   phase,
@@ -55,143 +62,54 @@ function BowWake({
   const k = Math.min(1, scale * 1.35);
   if (k <= 0.01) return null;
 
-  // Contact point: where the hull's bottom starts curving up toward the bow.
-  const contactX = 134;
   const L = lineY;
-  const reach = 14 + 50 * k;
-  const height = (3 + 15 * k) * (1 + 0.1 * Math.sin(phase * 1.3));
+  const originX = 134 + 6 + 5; // bow contact, nudged toward the bow
+  const originY = BOAT_HULL_BOTTOM;
+  const cycle = phase * 0.0333; // about one throw every 3s
 
-  // Crest height profile along the wave: rises from the contact, peaks just
-  // ahead of the bow, then sweeps back and falls off gradually.
-  const crestH = (t: number) => {
-    const rise = t < 0.14 ? t / 0.14 : Math.pow((1 - t) / 0.86, 1.5);
-    return height * rise;
-  };
-  const crestX = (t: number) => contactX + 4 - (reach + 4) * t;
-  const crestPt = (t: number) => ({ x: crestX(t), y: L - crestH(t) });
+  const bubbles: JSX.Element[] = [];
 
-  const out: JSX.Element[] = [];
-  let key = 0;
-
-  // Faint body of the wave so the bubbles read as one shape.
-  const outline: string[] = [];
-  for (let i = 0; i <= 40; i++) {
-    const p = crestPt(i / 40);
-    outline.push(`${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`);
-  }
-  outline.push(`L ${(contactX - reach).toFixed(2)} ${L.toFixed(2)}`);
-  outline.push(`L ${(contactX + 4).toFixed(2)} ${L.toFixed(2)} Z`);
-  out.push(
-    <path
-      key={key++}
-      d={outline.join(' ')}
-      fill={WAKE_GREY}
-      opacity={0.07 * k}
-    />,
-  );
-
-  // Dense bubbles along the crest.
-  const crestCount = 42;
-  for (let i = 0; i < crestCount; i++) {
-    const t = i / (crestCount - 1);
-    const p = crestPt(t);
-    const jit = Math.sin(i * 2.7 + phase * 1.4) * 0.7;
-    const r = 0.6 + (0.45 + 0.4 * Math.sin(i * 1.9)) * (0.6 + 0.9 * k);
-    const op = (0.75 - 0.5 * t) * k * (0.85 + 0.15 * Math.sin(phase * 2 + i));
-    out.push(
+  for (let i = 0; i < 30; i++) {
+    const f = (cycle + i / 30) % 1;
+    const a = ((34 + 36 * wakeRand(i + 3)) * Math.PI) / 180;
+    const R = (22 + 118 * k) * (0.7 + 0.3 * wakeRand(i + 9));
+    const H = (4 + 14 * k) * Math.sin(a);
+    const x = originX - Math.cos(a) * R * f;
+    const y = originY + (L - originY) * f * f - 4 * H * f * (1 - f);
+    bubbles.push(
       <circle
-        key={key++}
-        cx={p.x + jit * 0.4}
-        cy={p.y - Math.abs(jit)}
-        r={Math.max(0.4, r)}
-        fill={WAKE_GREY}
-        opacity={Math.max(0, op)}
-      />,
-    );
-  }
-
-  // Secondary, inner crest: a second roll of foam sitting behind the first.
-  const innerCount = 22;
-  for (let i = 0; i < innerCount; i++) {
-    const t = 0.12 + (0.8 * i) / (innerCount - 1);
-    const p = crestPt(t);
-    const r = 0.55 + (0.3 + 0.4 * Math.sin(i * 2.1)) * (0.5 + 0.8 * k);
-    const op = (0.4 - 0.3 * t) * k;
-    out.push(
-      <circle
-        key={key++}
-        cx={p.x - 2.2 + Math.sin(i + phase) * 0.6}
-        cy={L - crestH(t) * 0.55 + Math.cos(i * 1.7 + phase) * 0.6}
-        r={Math.max(0.35, r)}
-        fill={WAKE_GREY}
-        opacity={Math.max(0, op)}
-      />,
-    );
-  }
-
-  // Bubbles sitting on the timeline, from the contact back along the wave.
-  const baseCount = 28;
-  for (let i = 0; i < baseCount; i++) {
-    const t = i / (baseCount - 1);
-    const x = contactX + 4 - (reach + 4) * t;
-    const jit = Math.sin(i * 3.3 + phase * 1.1) * 0.6;
-    const r = 0.6 + (0.4 + 0.4 * Math.sin(i * 1.5)) * (0.6 + 0.8 * k);
-    const op = (0.6 - 0.45 * t) * k;
-    out.push(
-      <circle
-        key={key++}
-        cx={x + jit}
-        cy={L + 0.8 + Math.cos(i * 1.9 + phase) * 0.5}
-        r={Math.max(0.4, r)}
-        fill={WAKE_GREY}
-        opacity={Math.max(0, op)}
-      />,
-    );
-  }
-
-  // Sparse interior bubbles filling the wave body, thinning out upward.
-  const rows = [0.25, 0.5, 0.75];
-  const cols = 9;
-  for (let ri = 0; ri < rows.length; ri++) {
-    const g = rows[ri];
-    for (let c = 0; c < cols; c++) {
-      const t = 0.1 + (0.8 * (c + 0.5)) / cols;
-      const x = crestX(t) + Math.sin(c * 3.1 + ri + phase) * 0.9;
-      const y = L - crestH(t) * g + Math.cos(c * 1.9 + ri * 2 + phase) * 0.6;
-      const r = 0.45 + (0.3 + 0.3 * Math.sin(c * 1.3 + ri)) * (0.5 + 0.7 * k);
-      const op = (0.3 - 0.12 * ri) * k * (0.7 + 0.3 * Math.sin(phase + c));
-      out.push(
-        <circle
-          key={key++}
-          cx={x}
-          cy={y}
-          r={Math.max(0.35, r)}
-          fill={WAKE_GREY}
-          opacity={Math.max(0, op)}
-        />,
-      );
-    }
-  }
-
-  // Spray flicked off the crest peak, bouncing up then falling.
-  const peak = crestPt(0.1);
-  for (let i = 0; i < 6; i++) {
-    const rise = Math.abs(Math.sin(phase * 1.7 + i * 1.3));
-    const x = peak.x + 1 + i * 1.6 * k + Math.sin(phase + i) * 0.8;
-    const y = peak.y - rise * (2 + 6 * k) + 0.4 * i;
-    out.push(
-      <circle
-        key={key++}
+        key={`a${i}`}
         cx={x}
         cy={y}
-        r={0.6 + 0.4 * k}
+        r={0.7 + 1.5 * k * (1 - f * 0.5)}
         fill={WAKE_GREY}
-        opacity={0.5 * k * (1 - i / 7)}
+        opacity={Math.sin(Math.PI * f) * k * 0.8}
       />,
     );
   }
 
-  return <g pointerEvents="none">{out}</g>;
+  for (let i = 0; i < 30; i++) {
+    const f = (cycle * 1.5625 + i / 30) % 1;
+    const a = ((6 + 16 * wakeRand(i + 21)) * Math.PI) / 180;
+    const R = (14 + 72 * k) * (0.6 + 0.4 * wakeRand(i + 29));
+    const x = originX - Math.cos(a) * R * f;
+    const y =
+      originY +
+      (L - originY) * f * f -
+      2 * (1 + 4 * k) * Math.sin(a) * f * (1 - f);
+    bubbles.push(
+      <circle
+        key={`b${i}`}
+        cx={x}
+        cy={y}
+        r={0.4 + 0.8 * k}
+        fill={WAKE_GREY}
+        opacity={Math.sin(Math.PI * f) * k * 0.6}
+      />,
+    );
+  }
+
+  return <g pointerEvents="none">{bubbles}</g>;
 }
 
 function PrincecraftBoat() {
@@ -537,7 +455,7 @@ function DesktopTimeline() {
       setTiltAngle(currentTiltRef.current);
       setWakeScale(currentWakeRef.current);
       if (currentWakeRef.current > 0.01) {
-        setWakePhase((phase) => (phase + 0.16) % (Math.PI * 2));
+        setWakePhase((phase) => phase + 0.16);
       }
       animFrameRef.current = requestAnimationFrame(loop);
     };
@@ -738,7 +656,7 @@ function DesktopTimeline() {
                     key="bow"
                     scale={wakeScale}
                     phase={wakePhase}
-                    lineY={lineY}
+                    lineY={BOAT_HULL_BOTTOM + 8}
                   />,
                 );
 
