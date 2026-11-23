@@ -445,30 +445,37 @@ function DesktopTimeline() {
     setDateText(formatDate(currentDate));
 
     const boatCenter = boatLeft + boatW / 2 - sectionRect.left;
-    let nearest: number | null = null;
-    let nearestDist = Infinity;
-    cumulativeMonths.forEach((m, i) => {
-      const dist = Math.abs(boatCenter - (boatAndGapWidth + m * spacingPerMonth));
-      if (dist < nearestDist) {
-        nearestDist = dist;
-        nearest = i;
-      }
-    });
-    // Keep the current position's text while the boat is still inside its
-    // zone, so overlapping zones don't swap the text while it is showing.
-    const zone = 60 * bs;
+    // Zone for each position: a little before the dot, and further past it
+    // in the direction of travel, so the text stays up a bit after the boat passes.
+    const zoneBefore = 60 * bs;
+    const zoneAfter = 100 * bs;
+    const offsetOf = (i: number) =>
+      boatCenter - (boatAndGapWidth + cumulativeMonths[i] * spacingPerMonth);
+    const inZone = (i: number) => {
+      const d = offsetOf(i);
+      return d > -zoneBefore && d < zoneAfter;
+    };
+
+    // Keep the current position's text while the boat is still in its zone.
     const current = activeRef.current;
-    const currentDist = Math.abs(
-      boatCenter - (boatAndGapWidth + cumulativeMonths[current] * spacingPerMonth),
-    );
-    if (currentDist < zone) {
-      setFocus(1);
-    } else if (nearest !== null && nearestDist < zone) {
-      activeRef.current = nearest;
-      setActiveIdx(nearest);
+    if (inZone(current)) {
       setFocus(1);
     } else {
-      setFocus(0);
+      let found: number | null = null;
+      let foundDist = Infinity;
+      cumulativeMonths.forEach((_, i) => {
+        if (inZone(i) && Math.abs(offsetOf(i)) < foundDist) {
+          foundDist = Math.abs(offsetOf(i));
+          found = i;
+        }
+      });
+      if (found !== null) {
+        activeRef.current = found;
+        setActiveIdx(found);
+        setFocus(1);
+      } else {
+        setFocus(0);
+      }
     }
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
 
