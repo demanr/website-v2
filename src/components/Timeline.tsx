@@ -56,7 +56,7 @@ function BowWake({
   if (k <= 0.01) return null;
 
   // Contact point: where the hull's bottom starts curving up toward the bow.
-  const contactX = BOAT_LEFT_PAD + 134;
+  const contactX = 134;
   const L = lineY;
   const reach = 14 + 50 * k;
   const height = (3 + 15 * k) * (1 + 0.1 * Math.sin(phase * 1.3));
@@ -416,6 +416,7 @@ function DesktopTimeline() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [spacingPerMonth, setSpacingPerMonth] = useState(0);
   const [windowWidth, setWindowWidth] = useState(600);
+  const [boatScale, setBoatScale] = useState(1);
   const [tiltAngle, setTiltAngle] = useState(0);
   const [wakeScale, setWakeScale] = useState(0);
   const [wakePhase, setWakePhase] = useState(0);
@@ -432,6 +433,9 @@ function DesktopTimeline() {
       const ww = window.innerWidth;
       setWindowWidth(ww);
       setSpacingPerMonth(ww / 24);
+      setBoatScale(
+        Math.min(1.8, Math.max(1, Math.min(ww / 1440, window.innerHeight / 800))),
+      );
     };
     update();
     window.addEventListener('resize', update);
@@ -459,11 +463,16 @@ function DesktopTimeline() {
   // extra room after the oldest dot so its label is never clipped
   const timelineWidth = totalMonths * spacingPerMonth + 120;
   const gapWidth = windowWidth / 8;
-  const boatAndGapWidth = BOAT_LEFT_PAD + BOAT_WIDTH + gapWidth;
+  const bs = boatScale;
+  const boatLeft = BOAT_LEFT_PAD * bs;
+  const boatW = BOAT_WIDTH * bs;
+  const boatH = BOAT_HEIGHT * bs;
+  const hullB = BOAT_HULL_BOTTOM * bs;
+  const boatAndGapWidth = boatLeft + boatW + gapWidth;
 
   const svgHeight = 380;
   const lineY = 220;
-  const boatTop = lineY - BOAT_HULL_BOTTOM - 8;
+  const boatTop = lineY - hullB - 8 * bs;
 
   const handleScroll = useCallback(() => {
     const container = document.getElementById('home-scroll-desktop');
@@ -491,7 +500,7 @@ function DesktopTimeline() {
       currentWakeRef.current = Math.max(currentWakeRef.current, wakeTarget);
     }
 
-    const svgXAtBoat = BOAT_LEFT_PAD - sectionRect.left;
+    const svgXAtBoat = boatLeft - sectionRect.left;
     const progress = Math.max(0, Math.min(1, (svgXAtBoat - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
 
     const newestDate = orderedPositions[0].startDate;
@@ -562,24 +571,24 @@ function DesktopTimeline() {
         style={{ position: 'absolute', left: 0, top: 0, zIndex: 1 }}
       >
         <line
-          x1={BOAT_LEFT_PAD}
+          x1={boatLeft}
           y1={lineY - markerSize}
-          x2={BOAT_LEFT_PAD}
+          x2={boatLeft}
           y2={lineY + markerSize}
           stroke="#FFFFFF"
           strokeWidth={1.5}
         />
         <line
-          x1={BOAT_LEFT_PAD - markerSize}
+          x1={boatLeft - markerSize}
           y1={lineY}
-          x2={BOAT_LEFT_PAD + markerSize}
+          x2={boatLeft + markerSize}
           y2={lineY}
           stroke="#FFFFFF"
           strokeWidth={1.5}
         />
 
         <line
-          x1={BOAT_LEFT_PAD}
+          x1={boatLeft}
           y1={lineY}
           x2={boatAndGapWidth + lineEndX}
           y2={lineY}
@@ -639,12 +648,12 @@ function DesktopTimeline() {
           <div
             style={{
               position: 'absolute',
-              top: boatTop - 20,
-              left: BOAT_LEFT_PAD,
-              width: BOAT_WIDTH,
+              top: boatTop - 20 * bs,
+              left: boatLeft,
+              width: boatW,
+              fontSize: 14 * bs,
               textAlign: 'left',
               color: 'white',
-              fontSize: 14,
               fontWeight: 700,
               fontFamily: FONT_FAMILY,
             }}
@@ -665,10 +674,11 @@ function DesktopTimeline() {
               }}
             >
               {(() => {
-                const waterlineY = boatTop + BOAT_HULL_BOTTOM;
+                // local space: origin at the boat's top-left, scaled by bs
+                const waterlineY = BOAT_HULL_BOTTOM;
                 const disp = wakeScale;
                 const phase = wakePhase;
-                const sternX = BOAT_LEFT_PAD + 3.5;
+                const sternX = 3.5;
                 const els: JSX.Element[] = [];
                 let k = 0;
 
@@ -732,7 +742,11 @@ function DesktopTimeline() {
                   />,
                 );
 
-                return <g>{els}</g>;
+                return (
+                  <g transform={`translate(${boatLeft} ${boatTop}) scale(${bs})`}>
+                    {els}
+                  </g>
+                );
               })()}
             </svg>
           )}
@@ -742,21 +756,21 @@ function DesktopTimeline() {
             style={{
               position: 'absolute',
               top: boatTop,
-              left: BOAT_LEFT_PAD,
-              width: BOAT_WIDTH,
-              height: BOAT_HEIGHT,
-              transformOrigin: '80px 44px',
+              left: boatLeft,
+              width: boatW,
+              height: boatH,
+              transformOrigin: `${80 * bs}px ${44 * bs}px`,
             }}
           >
             <svg
-              width={BOAT_WIDTH}
-              height={BOAT_HEIGHT}
+              width={boatW}
+              height={boatH}
               viewBox="0 0 166 59"
               className="overflow-visible"
               style={{
                 display: 'block',
                 transform: `rotate(${tiltAngle}deg)`,
-                transformOrigin: `0px ${BOAT_HULL_BOTTOM}px`,
+                transformOrigin: `0px ${hullB}px`,
               }}
             >
               <PrincecraftBoat />
