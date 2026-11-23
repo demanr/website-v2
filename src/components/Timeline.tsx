@@ -342,6 +342,8 @@ function DesktopTimeline() {
   const [dateText, setDateText] = useState('');
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const [focus, setFocus] = useState(0);
+  const [vizScale, setVizScale] = useState(1);
+  const [vizScrollX, setVizScrollX] = useState(0);
   const lastScrollRef = useRef(0);
   const lastTimeRef = useRef(0);
   const velocityRef = useRef(0);
@@ -427,6 +429,10 @@ function DesktopTimeline() {
       // Target follows scroll speed; small slow scrolls barely register.
       wakeTargetRef.current = Math.min(1, Math.max(0, (dScroll - 2) / 30));
     }
+
+    const scrolledFromBoat = Math.max(0, -sectionRect.left);
+    setVizScrollX(scrolledFromBoat);
+    setVizScale(Math.min(1.4, Math.max(1, 1 + scrolledFromBoat / 200)));
 
     const svgXAtBoat = boatLeft - sectionRect.left;
     const progress = Math.max(0, Math.min(1, (svgXAtBoat - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
@@ -521,6 +527,17 @@ function DesktopTimeline() {
       className="relative"
       style={{ width: totalWidth, height: svgHeight }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: totalWidth,
+          height: svgHeight,
+          transform: `scale(${vizScale})`,
+          transformOrigin: `${vizScrollX + boatLeft}px ${lineY}px`,
+        }}
+      >
       <svg
         width={totalWidth}
         height={svgHeight}
@@ -775,6 +792,7 @@ function DesktopTimeline() {
           </div>
 
         </div>
+      </div>
       </div>
     </div>
   );
