@@ -555,8 +555,8 @@ function DesktopTimeline() {
 
       currentTiltRef.current += (0 - currentTiltRef.current) * DECAY_LERP;
       // ease toward the scroll-driven target, slowly, in both directions
-      wakeTargetRef.current *= 0.85;
-      currentWakeRef.current += (wakeTargetRef.current - currentWakeRef.current) * 0.07;
+      wakeTargetRef.current *= 0.95;
+      currentWakeRef.current += (wakeTargetRef.current - currentWakeRef.current) * 0.06;
 
       if (Math.abs(currentTiltRef.current) < 0.01) currentTiltRef.current = 0;
       if (Math.abs(currentWakeRef.current) < 0.005) {
