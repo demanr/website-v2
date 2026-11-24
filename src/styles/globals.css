@@ -52,8 +52,54 @@ body {
   will-change: transform;
 }
 
+.mobile-wake-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: #b9cad2;
+  opacity: 0;
+  animation-name: mobile-wake-stern;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.mobile-wake-bow .mobile-wake-bubble {
+  animation-name: mobile-wake-bow;
+}
+
+@keyframes mobile-wake-stern {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes mobile-wake-bow {
+  0% {
+    transform: translate(0, 0) scale(0.55);
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .boat-bob {
+    animation: none;
+  }
+
+  .mobile-wake-bubble {
     animation: none;
   }
 }

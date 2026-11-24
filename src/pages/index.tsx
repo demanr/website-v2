@@ -207,10 +207,7 @@ export default function Home() {
         <h2 className="p-2 pr-10 text-3xl border-b border-white w-fit font-mulish">
           POSITIONS
         </h2>
-        <div
-          id="positions-mobile"
-          className="flex flex-col items-center pb-32"
-        >
+        <div id="positions-mobile" className="w-full">
           <Timeline variant="mobile" />
         </div>
       </div>

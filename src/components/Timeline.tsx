@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { positions } from '@/types/positions';
 
 interface TimelineProps {
@@ -19,14 +20,14 @@ const BOAT_HULL_BOTTOM = 55.7;
 // leave room behind the motor for the wake when the boat pins to the left
 const BOAT_LEFT_PAD = 80;
 
-const MOBILE_DOT_SIZE = 14;
-const MOBILE_LINE_LEFT_PAD = 20;
-const MOBILE_DASH = 6;
-const MOBILE_GAP = 8;
-const MOBILE_DIAG = 48;
-const MOBILE_DIAG_ANGLE_RAD = (25 * Math.PI) / 180;
-const MOBILE_SPACING_PER_MONTH = 16;
-const MOBILE_TOP_PAD = 28;
+const MOBILE_RAIL_X = 72;
+const MOBILE_TOP_PAD = 34;
+const MOBILE_BOTTOM_PAD = 180;
+const MOBILE_SPACING_PER_MONTH = 32;
+const MOBILE_BOAT_WIDTH = 60;
+const MOBILE_BOAT_HEIGHT = 150;
+const MOBILE_BOAT_DRIFT = 0.06;
+const MOBILE_BOAT_ZOOM = 1.1;
 
 const MAX_TILT_DEG = 2;
 
@@ -41,6 +42,14 @@ function monthsBetween(a: Date, b: Date): number {
 
 function formatDate(d: Date): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function addMonths(date: Date, months: number): Date {
+  return new Date(date.getFullYear(), date.getMonth() + months, 1);
+}
+
+function nb(text: string): string {
+  return text.replace(/-/g, '\u2011');
 }
 
 function wakeRand(i: number) {
@@ -193,21 +202,178 @@ function PrincecraftBoat() {
   );
 }
 
+/**
+ * Top-down Princecraft used on mobile. Approved design notes:
+ * - red leather: rear bench + one connected, backless front bench
+ * - continuous chrome windshield arc (no centre split)
+ * - closed red bow (~35% of the hull)
+ * - recessed stern well with the red gas tank; no PRINCECRAFT lettering
+ * - no steering wheel for now (to be redesigned)
+ * - white hull, red trim (no yellow)
+ * Full notes: /tmp/boat-designs/NOTES.md
+ */
+function TopDownBoat() {
+  return (
+    <svg
+      viewBox="0 0 120 300"
+      className="block h-full w-full overflow-visible"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* hull */}
+      <path
+        d="M 12 32 Q 5 32 5 46 C 3 114 11 200 26 244 C 35 270 49 285 60 292 C 71 285 85 270 94 244 C 109 200 117 114 115 46 Q 115 32 108 32 Z"
+        fill="rgba(185,202,210,.10)"
+        stroke="#fff"
+        strokeWidth={2.6}
+        strokeLinejoin="round"
+      />
+      {/* inner deck / gunwale */}
+      <path
+        d="M 22 44 Q 15 44 15 56 C 14 114 22 198 35 240 C 44 262 54 278 60 284 C 66 278 76 262 85 240 C 98 198 106 114 105 56 Q 105 44 98 44 Z"
+        fill="rgba(255,255,255,.035)"
+        stroke="#fff"
+        strokeWidth={1.4}
+        strokeOpacity={0.7}
+      />
+
+      {/* white + red side stripes */}
+      <path d="M 19 48 C 17 114 25 198 38 240" fill="none" stroke="#A8232B" strokeWidth={3.4} strokeLinecap="round" />
+      <path d="M 101 48 C 103 114 95 198 82 240" fill="none" stroke="#A8232B" strokeWidth={3.4} strokeLinecap="round" />
+      <path d="M 24 48 C 22 114 30 196 42 236" fill="none" stroke="#fff" strokeWidth={1.1} strokeOpacity={0.8} />
+      <path d="M 96 48 C 98 114 90 196 78 236" fill="none" stroke="#fff" strokeWidth={1.1} strokeOpacity={0.8} />
+
+      {/* cockpit floor */}
+      <path d="M 28 112 H 92 V 168 H 28 Z" fill="rgba(242,227,213,.055)" stroke="rgba(242,227,213,.14)" strokeWidth={0.8} />
+      <path d="M 52 112 V 168 M 68 112 V 168" fill="none" stroke="#F2E3D5" strokeWidth={0.7} strokeOpacity={0.12} strokeDasharray="3 5" />
+
+      {/* stern well + red gas tank */}
+      <path
+        d="M 30 38 Q 24 38 24 44 V 64 Q 24 70 30 70 H 90 Q 96 70 96 64 V 44 Q 96 38 90 38 Z"
+        fill="rgba(0,0,0,.55)"
+        stroke="rgba(255,255,255,.35)"
+        strokeWidth={1}
+      />
+      <path d="M 32 42 H 88 V 66 H 32 Z" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth={0.8} />
+      <rect x="44" y="44" width="20" height="19" rx="3.5" fill="#C2373D" stroke="#F2E3D5" strokeWidth={1.1} />
+      <path d="M 48 44 v3 M 60 44 v3" fill="none" stroke="#F2E3D5" strokeWidth={1} strokeOpacity={0.6} />
+      <circle cx="58" cy="48" r="1.9" fill="#F2E3D5" fillOpacity={0.85} />
+      <path d="M 52 44 C 48 38 45 35 45 32" fill="none" stroke="#DDE7EC" strokeWidth={0.9} strokeOpacity={0.8} />
+      <path d="M 46 58 h16" fill="none" stroke="#7E161C" strokeWidth={0.9} strokeOpacity={0.6} />
+
+      {/* rear bench */}
+      <rect x="22" y="76" width="76" height="34" rx="7" fill="#B3252C" stroke="#F2E3D5" strokeWidth={1.2} />
+      <rect x="25" y="79" width="70" height="10" rx="4" fill="#8C1A20" stroke="#F2E3D5" strokeWidth={0.8} strokeOpacity={0.55} />
+      <path d="M 60 90 V 108" fill="none" stroke="#7E161C" strokeWidth={0.9} strokeOpacity={0.55} />
+      <path d="M 28 97 h64" fill="none" stroke="#F2E3D5" strokeWidth={0.8} strokeOpacity={0.28} />
+
+      {/* front bench: connected, no backrest */}
+      <rect x="22" y="136" width="76" height="28" rx="7" fill="#B3252C" stroke="#F2E3D5" strokeWidth={1.2} />
+      <path d="M 60 139 V 161" fill="none" stroke="#7E161C" strokeWidth={0.9} strokeOpacity={0.55} />
+      <path d="M 28 146 h26 M 66 146 h26 M 28 153 h26 M 66 153 h26" fill="none" stroke="#F2E3D5" strokeWidth={0.8} strokeOpacity={0.28} />
+
+      {/* windshield: one continuous arc */}
+      <path
+        d="M 20 188 Q 60 196 100 188 L 99 180 Q 60 188 21 180 Z"
+        fill="rgba(143,163,173,.3)"
+        stroke="#DDE7EC"
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+      <path d="M 25 184 Q 60 191 95 184" fill="none" stroke="#fff" strokeWidth={0.8} strokeOpacity={0.4} />
+
+      {/* closed red bow */}
+      <path
+        d="M 22 193 C 27 224 38 252 49 271 Q 60 283 71 271 C 82 252 93 224 98 193 Z"
+        fill="#A8232B"
+        stroke="#F2E3D5"
+        strokeWidth={1.1}
+        strokeOpacity={0.8}
+        strokeLinejoin="round"
+      />
+      <path d="M 60 202 V 268" fill="none" stroke="#7E161C" strokeWidth={0.9} strokeOpacity={0.7} />
+      <path d="M 46 212 C 51 236 56 254 60 264 C 64 254 69 236 74 212" fill="none" stroke="#F2E3D5" strokeWidth={0.8} strokeOpacity={0.3} />
+      <path d="M 53 264 h14" fill="none" stroke="#DDE7EC" strokeWidth={1.7} strokeLinecap="round" />
+      <path d="M 56 260.5 v7 M 64 260.5 v7" fill="none" stroke="#DDE7EC" strokeWidth={0.9} strokeOpacity={0.85} />
+
+      {/* gunwale cleats */}
+      <path d="M 12 72 h7 M 15.5 72 v3" fill="none" stroke="#fff" strokeWidth={1} strokeOpacity={0.7} strokeLinecap="round" />
+      <path d="M 101 72 h7 M 104.5 72 v3" fill="none" stroke="#fff" strokeWidth={1} strokeOpacity={0.7} strokeLinecap="round" />
+
+      {/* Evinrude outboard */}
+      <path
+        d="M 45 32 L 45 17 Q 45 9 53 9 L 67 9 Q 75 9 75 17 L 75 32 Z"
+        fill="#171b23"
+        stroke="#fff"
+        strokeWidth={2.1}
+        strokeLinejoin="round"
+      />
+      <path d="M 47 18 h26 M 47 27 h26" fill="none" stroke="#fff" strokeWidth={0.9} strokeOpacity={0.45} />
+      <path d="M 60 10 v20" fill="none" stroke="#fff" strokeWidth={0.8} strokeOpacity={0.28} />
+      <rect x="56" y="12.5" width="8" height="3.4" rx="1.2" fill="#A8232B" />
+      <path d="M 45 24 L 36 28" fill="none" stroke="#fff" strokeWidth={1.6} strokeLinecap="round" />
+      <circle cx="36" cy="28" r="2" fill="#fff" />
+      <path d="M 45 32 v5 M 75 32 v5" fill="none" stroke="#fff" strokeWidth={1.2} strokeOpacity={0.6} />
+    </svg>
+  );
+}
+
+type WakeBubble = {
+  id: string;
+  kind: 'stern' | 'bow';
+  size: number;
+  dx: number;
+  dy: number;
+  duration: number;
+  delay: number;
+};
+
+function makeWakeBubbles(): WakeBubble[] {
+  const out: WakeBubble[] = [];
+  for (let i = 0; i < 12; i++) {
+    const seed = 100 + i * 7;
+    out.push({
+      id: `s${i}`,
+      kind: 'stern',
+      size: 1.8 + wakeRand(seed) * 2.8,
+      dx: wakeRand(seed + 1) * 52 - 26,
+      dy: -(26 + wakeRand(seed + 2) * 54),
+      duration: 1.1 + wakeRand(seed + 3),
+      delay: -wakeRand(seed + 4) * 1.6,
+    });
+  }
+  for (let i = 0; i < 16; i++) {
+    const seed = 400 + i * 9;
+    const angle = ((wakeRand(seed) * 44 - 22) * Math.PI) / 180;
+    const dist = 26 + wakeRand(seed + 1) * 46;
+    out.push({
+      id: `b${i}`,
+      kind: 'bow',
+      size: 1.8 + wakeRand(seed + 2) * 2.8,
+      dx: Math.sin(angle) * dist,
+      dy: Math.cos(angle) * dist,
+      duration: 0.85 + wakeRand(seed + 3) * 0.8,
+      delay: -wakeRand(seed + 4) * 1.6,
+    });
+  }
+  return out;
+}
+
 function MobileTimeline() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const boatRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLSpanElement>(null);
+  const sternWakeRef = useRef<HTMLDivElement>(null);
+  const bowWakeRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const element = wrapRef.current;
-    if (!element) return;
-
-    const update = () => setWidth(element.clientWidth);
-    update();
-
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+  const [stageHeight, setStageHeight] = useState(800);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [shownIdx, setShownIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+  const activeRef = useRef(0);
 
   // newest first
   const orderedPositions = positions;
@@ -227,105 +393,470 @@ function MobileTimeline() {
   }, [orderedPositions]);
 
   const totalMonths = cumulativeMonths[cumulativeMonths.length - 1];
-  const lineX = MOBILE_LINE_LEFT_PAD;
-  const lineTop = MOBILE_TOP_PAD;
-  const lineBottom = MOBILE_TOP_PAD + totalMonths * MOBILE_SPACING_PER_MONTH;
-  const svgHeight = lineBottom + 72;
+  const railHeight = totalMonths * MOBILE_SPACING_PER_MONTH;
+  const maxScroll = railHeight;
 
-  const dotCenters = useMemo(() => {
-    return cumulativeMonths.map((m) => ({
-      x: lineX,
-      y: MOBILE_TOP_PAD + m * MOBILE_SPACING_PER_MONTH,
-    }));
-  }, [cumulativeMonths, lineX]);
+  const dotYs = useMemo(
+    () =>
+      cumulativeMonths.map(
+        (m) => MOBILE_TOP_PAD + m * MOBILE_SPACING_PER_MONTH,
+      ),
+    [cumulativeMonths],
+  );
 
-  const dx = MOBILE_DIAG * Math.cos(MOBILE_DIAG_ANGLE_RAD);
-  const dy = MOBILE_DIAG * Math.sin(MOBILE_DIAG_ANGLE_RAD);
+  const yearTicks = useMemo(() => {
+    const ticks: { year: number; top: number }[] = [];
+    orderedPositions.forEach((p, i) => {
+      const year = p.startDate.getFullYear();
+      if (!ticks.length || ticks[ticks.length - 1].year !== year) {
+        ticks.push({ year, top: dotYs[i] });
+      }
+    });
+    return ticks;
+  }, [orderedPositions, dotYs]);
+
+  const [bubbles, setBubbles] = useState<WakeBubble[]>([]);
+
+  useEffect(() => {
+    setBubbles(makeWakeBubbles());
+  }, []);
+
+  useEffect(() => {
+    const update = () => setStageHeight(window.innerHeight);
+    update();
+
+    window.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('resize', update);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeIdx === shownIdx) return;
+
+    setFading(true);
+    const timer = setTimeout(() => {
+      setShownIdx(activeIdx);
+      setFading(false);
+    }, 130);
+    return () => clearTimeout(timer);
+  }, [activeIdx, shownIdx]);
+
+  useEffect(() => {
+    if (dateRef.current) {
+      dateRef.current.textContent = formatDate(orderedPositions[0].startDate);
+    }
+  }, [orderedPositions]);
+
+  useEffect(() => {
+    let raf = 0;
+    let lastScrollY = window.scrollY;
+    let lastScrollAt = 0;
+    let targetWake = 0;
+    let wakeOpacity = 0;
+
+    const tick = (now: number) => {
+      const section = sectionRef.current;
+      const stage = stageRef.current;
+
+      if (section && stage) {
+        const currentStageHeight = stage.clientHeight || stageHeight;
+        const rect = section.getBoundingClientRect();
+        const scrolled = Math.max(0, Math.min(maxScroll, -rect.top));
+        const progress = maxScroll > 0 ? scrolled / maxScroll : 0;
+        const zoom = 1 + (MOBILE_BOAT_ZOOM - 1) * progress;
+        const boatY = Math.round(
+          currentStageHeight * 0.5 +
+            (progress - 0.5) * currentStageHeight * MOBILE_BOAT_DRIFT,
+        );
+
+        if (timelineRef.current) {
+          timelineRef.current.style.top = `${boatY - MOBILE_TOP_PAD}px`;
+          timelineRef.current.style.transform = `translateY(${-scrolled}px) scale(${zoom})`;
+          timelineRef.current.style.transformOrigin = `${MOBILE_RAIL_X}px ${MOBILE_TOP_PAD + scrolled}px`;
+        }
+        if (boatRef.current) boatRef.current.style.top = `${boatY}px`;
+        if (cardRef.current) cardRef.current.style.top = `${boatY}px`;
+
+        let nearest = 0;
+        let nearestDist = Number.POSITIVE_INFINITY;
+        for (let i = 0; i < dotYs.length; i++) {
+          const distance = Math.abs(dotYs[i] - (MOBILE_TOP_PAD + scrolled));
+          if (distance < nearestDist) {
+            nearestDist = distance;
+            nearest = i;
+          }
+        }
+
+        if (nearest !== activeRef.current) {
+          activeRef.current = nearest;
+          setActiveIdx(nearest);
+        }
+
+        if (dateRef.current) {
+          const date =
+            nearestDist < 5
+              ? orderedPositions[nearest].startDate
+              : addMonths(
+                  orderedPositions[0].startDate,
+                  -scrolled / MOBILE_SPACING_PER_MONTH,
+                );
+          const text = formatDate(date);
+          if (dateRef.current.textContent !== text) {
+            dateRef.current.textContent = text;
+          }
+        }
+
+        const scrollY = window.scrollY;
+        const delta = Math.abs(scrollY - lastScrollY);
+        lastScrollY = scrollY;
+        if (delta > 0.4) {
+          targetWake = Math.min(1, 0.35 + delta / 30);
+          lastScrollAt = now;
+        }
+      }
+
+      if (now - lastScrollAt > 120) {
+        targetWake = Math.max(0, targetWake - 0.012);
+      }
+      wakeOpacity += (targetWake - wakeOpacity) * 0.08;
+      if (wakeOpacity < 0.008) wakeOpacity = 0;
+      if (sternWakeRef.current) {
+        sternWakeRef.current.style.opacity = `${wakeOpacity}`;
+      }
+      if (bowWakeRef.current) {
+        bowWakeRef.current.style.opacity = `${wakeOpacity}`;
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [dotYs, maxScroll, orderedPositions, stageHeight]);
+
+  const shown = orderedPositions[shownIdx];
+  const wakeStyle = (bubble: WakeBubble) =>
+    ({
+      width: bubble.size,
+      height: bubble.size,
+      left: -bubble.size / 2,
+      top: -bubble.size / 2,
+      '--dx': `${bubble.dx}px`,
+      '--dy': `${bubble.dy}px`,
+      animationDuration: `${bubble.duration}s`,
+      animationDelay: `${bubble.delay}s`,
+    }) as CSSProperties;
 
   return (
-    <div className="w-full" ref={wrapRef}>
-      {width > 0 && (
-        <svg width={width} height={svgHeight} className="overflow-visible">
-          <line
-            x1={lineX}
-            y1={lineTop}
-            x2={lineX}
-            y2={lineBottom}
-            stroke="white"
-            strokeWidth={1.5}
-            strokeDasharray={`${MOBILE_DASH} ${MOBILE_GAP}`}
-          />
-          <line
-            x1={lineX - 6}
-            y1={lineTop}
-            x2={lineX + 6}
-            y2={lineTop}
-            stroke="white"
-            strokeWidth={1.5}
-          />
-          <line
-            x1={lineX - 6}
-            y1={lineBottom}
-            x2={lineX + 6}
-            y2={lineBottom}
-            stroke="white"
-            strokeWidth={1.5}
-          />
+    <div
+      ref={sectionRef}
+      className="relative w-full"
+      style={{ height: maxScroll + stageHeight }}
+    >
+      <div
+        ref={stageRef}
+        className="sticky top-0 overflow-hidden"
+        style={{ height: stageHeight, background: '#0C0D14' }}
+      >
+        <div
+          className="relative mx-auto h-full w-full"
+          style={{ maxWidth: 430 }}
+        >
+          <div
+            className="pointer-events-none absolute z-[1]"
+            style={{
+              top: 16,
+              right: 12,
+              fontFamily: FONT_FAMILY,
+              fontSize: 104,
+              fontWeight: 700,
+              lineHeight: 1,
+              letterSpacing: '-0.05em',
+              color: '#fff',
+              opacity: 0.04,
+            }}
+          >
+            {orderedPositions[activeIdx].startDate.getFullYear()}
+          </div>
 
-          {dotCenters.map((c, i) => {
-            const endX = c.x + dx;
-            const endY = c.y + dy;
+          <div
+            ref={timelineRef}
+            className="absolute inset-x-0 z-[2] will-change-transform"
+            style={{
+              top: stageHeight * 0.5 - MOBILE_TOP_PAD,
+              height: MOBILE_TOP_PAD + railHeight + MOBILE_BOTTOM_PAD,
+            }}
+          >
+            <div
+              className="absolute"
+              style={{
+                left: MOBILE_RAIL_X,
+                top: MOBILE_TOP_PAD,
+                height: railHeight + 34,
+                borderLeft: '1.5px dashed rgba(255,255,255,0.78)',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: MOBILE_RAIL_X - 6,
+                top: MOBILE_TOP_PAD,
+                width: 13,
+                height: 1.5,
+                background: '#fff',
+              }}
+            />
+            <div
+              className="absolute"
+              style={{
+                left: MOBILE_RAIL_X - 6,
+                top: MOBILE_TOP_PAD + railHeight,
+                width: 13,
+                height: 1.5,
+                background: '#fff',
+              }}
+            />
 
-            return (
-              <g key={orderedPositions[i].company + orderedPositions[i].title}>
-                <line
-                  x1={c.x}
-                  y1={c.y}
-                  x2={endX}
-                  y2={endY}
-                  stroke="white"
-                  strokeWidth={1}
+            {yearTicks.map((tick) => (
+              <div
+                key={tick.year}
+                className="absolute"
+                style={{
+                  left: 6,
+                  width: 34,
+                  top: tick.top,
+                  transform: 'translateY(-50%)',
+                  textAlign: 'right',
+                  fontFamily: FONT_FAMILY,
+                  fontSize: 10,
+                  color: 'rgba(255,255,255,0.4)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {tick.year}
+                <span
+                  className="absolute"
+                  style={{
+                    right: -12,
+                    top: '50%',
+                    width: 5,
+                    height: 1,
+                    background: 'rgba(255,255,255,0.25)',
+                  }}
                 />
-                <circle
-                  cx={c.x}
-                  cy={c.y}
-                  r={MOBILE_DOT_SIZE / 2}
-                  fill="#0C0D14"
-                  stroke="white"
-                  strokeWidth={1.5}
-                />
-                <foreignObject
-                  x={endX + 10}
-                  y={endY - 10}
-                  width={Math.max(width - endX - 24, 40)}
-                  height={54}
+              </div>
+            ))}
+
+            {orderedPositions.map((p, i) => (
+              <div
+                key={`dot-${p.company}-${p.title}`}
+                data-position-dot={i}
+                className="absolute"
+                style={{
+                  left: MOBILE_RAIL_X,
+                  top: dotYs[i],
+                  width: 14,
+                  height: 14,
+                  marginLeft: -7,
+                  marginTop: -7,
+                  borderRadius: '50%',
+                  background: '#0C0D14',
+                  border: '1.5px solid #fff',
+                }}
+              />
+            ))}
+
+            {orderedPositions.map((p, i) => (
+              <div
+                key={`tag-${p.company}-${p.title}`}
+                className="absolute flex items-baseline whitespace-nowrap"
+                style={{
+                  left: 108,
+                  top: dotYs[i],
+                  transform: 'translateY(-50%)',
+                  gap: 6,
+                  opacity: 0.42,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: '#fff',
+                  }}
                 >
-                  <div
-                    {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)}
-                    style={{
-                      color: 'white',
-                      fontSize: 15,
-                      fontFamily: FONT_FAMILY,
-                      textAlign: 'left',
-                      lineHeight: 1.25,
-                    }}
-                  >
-                    <div
-                      style={{ fontWeight: 700, textDecoration: 'underline' }}
-                    >
-                      {orderedPositions[i].company}
-                    </div>
-                    <div>{orderedPositions[i].title}</div>
-                    <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>
-                      {formatDate(orderedPositions[i].startDate)}
-                    </div>
-                  </div>
-                </foreignObject>
-              </g>
-            );
-          })}
-        </svg>
-      )}
+                  {p.company}
+                </span>
+                <span
+                  style={{
+                    fontSize: 9,
+                    letterSpacing: '0.06em',
+                    color: 'rgba(255,255,255,0.5)',
+                  }}
+                >
+                  {p.startDate.getFullYear()}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div
+            ref={cardRef}
+            data-position-card
+            className="absolute z-[6] -translate-y-1/2"
+            style={{
+              left: 108,
+              right: 16,
+              top: stageHeight * 0.5,
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 16,
+              background: '#0E1018',
+              boxShadow: '0 18px 46px rgba(0,0,0,0.55)',
+              padding: '13px 16px 15px',
+            }}
+          >
+            <span
+              className="absolute"
+              style={{
+                left: -7,
+                top: '50%',
+                width: 12,
+                height: 12,
+                transform: 'translateY(-50%) rotate(45deg)',
+                background: '#0E1018',
+                borderLeft: '1px solid rgba(255,255,255,0.12)',
+                borderBottom: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 2,
+              }}
+            />
+            <div
+              style={{
+                opacity: fading ? 0 : 1,
+                transition: 'opacity 160ms ease-out',
+              }}
+            >
+              <div
+                className="flex items-center justify-between"
+                style={{ gap: 10, marginBottom: 4 }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: FONT_FAMILY,
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: '#E8B93B',
+                  }}
+                >
+                  {shown.company}
+                </p>
+                <span
+                  ref={dateRef}
+                  style={{
+                    flex: 'none',
+                    fontFamily: FONT_FAMILY,
+                    fontSize: 9,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.72)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    borderRadius: 999,
+                    padding: '3px 7px',
+                    fontVariantNumeric: 'tabular-nums',
+                    whiteSpace: 'nowrap',
+                  }}
+                />
+              </div>
+              <h3
+                style={{
+                  margin: 0,
+                  fontFamily: FONT_FAMILY,
+                  fontSize: 17,
+                  lineHeight: 1.2,
+                  letterSpacing: '-0.01em',
+                  color: '#fff',
+                }}
+              >
+                {nb(shown.title)}
+              </h3>
+              <p
+                style={{
+                  margin: '3px 0 0',
+                  fontSize: 9.5,
+                  letterSpacing: '0.05em',
+                  color: 'rgba(255,255,255,0.42)',
+                }}
+              >
+                {formatDate(shown.startDate)}
+                {shownIdx === 0 ? ' · Present' : ''}
+              </p>
+              <p
+                style={{
+                  margin: '8px 0 0',
+                  fontSize: 11,
+                  lineHeight: 1.55,
+                  color: 'rgba(255,255,255,0.7)',
+                }}
+              >
+                {shown.description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            ref={boatRef}
+            data-position-boat
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+            style={{ left: MOBILE_RAIL_X, top: stageHeight * 0.5 }}
+          >
+            <div
+              className="boat-bob relative"
+              style={{
+                width: MOBILE_BOAT_WIDTH,
+                height: MOBILE_BOAT_HEIGHT,
+              }}
+            >
+              <div
+                ref={sternWakeRef}
+                className="pointer-events-none absolute left-1/2 h-0 w-0 opacity-0"
+                style={{ top: '12%' }}
+              >
+                {bubbles
+                  .filter((bubble) => bubble.kind === 'stern')
+                  .map((bubble) => (
+                    <span
+                      key={bubble.id}
+                      className="mobile-wake-bubble"
+                      style={wakeStyle(bubble)}
+                    />
+                  ))}
+              </div>
+              <div
+                ref={bowWakeRef}
+                className="mobile-wake-bow pointer-events-none absolute left-1/2 h-0 w-0 opacity-0"
+                style={{ top: '92%' }}
+              >
+                {bubbles
+                  .filter((bubble) => bubble.kind === 'bow')
+                  .map((bubble) => (
+                    <span
+                      key={bubble.id}
+                      className="mobile-wake-bubble"
+                      style={wakeStyle(bubble)}
+                    />
+                  ))}
+              </div>
+              <TopDownBoat />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
