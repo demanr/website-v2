@@ -1,14 +1,10 @@
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import CopyrightBeta from "../components/CopyrightBeta";
 import Navbar from "../components/Navbar";
 import BottomBar from "@/components/BottomBar";
 import SocialLinkMobile from "@/components/SocialLinksMobile";
 import TradingCard from "@/components/TradingCard";
-import ProjectCard from "@/components/ProjectCard";
 import Timeline from "@/components/Timeline";
 import {
-  SiCplusplus,
   SiNextdotjs,
   SiPython,
   SiReact,
@@ -18,12 +14,6 @@ import {
   SiOpencv,
   SiX,
 } from "react-icons/si";
-
-import { IoHardwareChipOutline } from "react-icons/io5";
-
-import { RiRobot2Line } from "react-icons/ri";
-
-//const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const tradingCards = [
@@ -52,7 +42,6 @@ export default function Home() {
         "https://github.com/Krish120003/lane-centering-bracketbot?tab=readme-ov-file#how",
       altUrlLabel: "Video Demo",
       tech: [
-        // { name: "Hardware", icon: RiRobot2Line },
         { name: "OpenCV", icon: SiOpencv },
         { name: "Python", icon: SiPython },
       ],
@@ -219,7 +208,7 @@ export default function Home() {
       <div className="hidden h-full md:block">
         <div
           id="home-scroll-desktop"
-          className="h-full overflow-x-auto "
+          className="h-full overflow-x-auto no-scrollbar"
           onWheel={handleDesktopHorizontalWheel}
         >
           <div className="flex items-start h-full my-auto">
@@ -276,24 +265,14 @@ export default function Home() {
             </div>
             <div
               id="positions-desktop"
-              className="relative z-10 flex-none px-16 my-auto"
+              className="relative z-10 flex-none pl-16 my-auto"
             >
               <Timeline />
-            </div>
-            <div className="min-w-[28rem] px-40 py-10 my-auto flex-none relative z-10">
-              <Image
-                src="/minecraft_under_construction.png"
-                alt="Under construction"
-                width={700}
-                height={394}
-                className="right-0 h-auto max-w-md w-60"
-                priority
-              />
             </div>
           </div>
         </div>
       </div>
-      <div className="absolute bottom-0 hidden w-full bg-black md:block">
+      <div id="desktop-footer" className="absolute bottom-0 hidden w-full bg-black md:block">
         <BottomBar />
       </div>
     </div>
