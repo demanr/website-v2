@@ -1,14 +1,10 @@
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import CopyrightBeta from "../components/CopyrightBeta";
 import Navbar from "../components/Navbar";
 import BottomBar from "@/components/BottomBar";
 import SocialLinkMobile from "@/components/SocialLinksMobile";
 import TradingCard from "@/components/TradingCard";
-import ProjectCard from "@/components/ProjectCard";
 import Timeline from "@/components/Timeline";
 import {
-  SiCplusplus,
   SiNextdotjs,
   SiPython,
   SiReact,
@@ -18,12 +14,6 @@ import {
   SiOpencv,
   SiX,
 } from "react-icons/si";
-
-import { IoHardwareChipOutline } from "react-icons/io5";
-
-import { RiRobot2Line } from "react-icons/ri";
-
-//const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const tradingCards = [
@@ -52,7 +42,6 @@ export default function Home() {
         "https://github.com/Krish120003/lane-centering-bracketbot?tab=readme-ov-file#how",
       altUrlLabel: "Video Demo",
       tech: [
-        // { name: "Hardware", icon: RiRobot2Line },
         { name: "OpenCV", icon: SiOpencv },
         { name: "Python", icon: SiPython },
       ],

@@ -511,7 +511,7 @@ function DesktopTimeline() {
         }
       }, 380);
     }
-  }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs]);
+  }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs, orderedPositions]);
 
   useEffect(() => {
     handleScroll();
