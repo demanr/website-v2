@@ -175,7 +175,7 @@ function PrincecraftBoat() {
         stroke="none"
         opacity={0.95}
       />
-      <path d="M46 47.4 53 38.6h4l-7 8.8z" fill="#E8B93B" stroke="none" />
+      <path d="M46 47.4 53 38.6h4l-7 8.8z" fill="#A8232B" stroke="none" />
 
       <text
         x="59.5"
