@@ -400,9 +400,6 @@ function DesktopTimeline() {
   }, [orderedPositions]);
 
   const totalMonths = cumulativeMonths[cumulativeMonths.length - 1];
-  // extra room after the oldest dot so its label is never clipped, plus a
-  // runway so the pinned boat can scroll all the way onto the oldest position
-  const timelineWidth = totalMonths * spacingPerMonth + 120 + windowWidth;
   const gapWidth = windowWidth / 8;
   const bs = boatScale;
   const boatLeft = BOAT_LEFT_PAD * bs;
@@ -410,6 +407,11 @@ function DesktopTimeline() {
   const boatH = BOAT_HEIGHT * bs;
   const hullB = BOAT_HULL_BOTTOM * bs;
   const boatAndGapWidth = boatLeft + boatW + gapWidth;
+  // End the line where the pinned boat can reach the last dot, rather than
+  // overshooting into a long empty runway.
+  const timelineWidth =
+    totalMonths * spacingPerMonth +
+    Math.max(160, windowWidth - boatLeft - boatW / 2);
 
   const svgHeight = 380;
   const lineY = 220;
@@ -443,20 +445,35 @@ function DesktopTimeline() {
     setVizScrollX(scrolledFromBoat);
     setVizScale(Math.min(1.3, Math.max(1, 1 + scrolledFromBoat / 1000)));
 
-    const svgXAtBoat = boatLeft - sectionRect.left;
-    const progress = Math.max(0, Math.min(1, (svgXAtBoat - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
+    // The dot aligns with the boat's centre, so the current date should be
+    // read at the centre too (not at the boat's left edge).
+    const boatCenter = boatLeft + boatW / 2 - sectionRect.left;
+    const progress = Math.max(0, Math.min(1, (boatCenter - boatAndGapWidth) / (totalMonths * spacingPerMonth || 1)));
 
     const newestDate = orderedPositions[0].startDate;
     const oldestDate = orderedPositions[orderedPositions.length - 1].startDate;
     const dateRange = oldestDate.getTime() - newestDate.getTime();
     const currentDate = new Date(newestDate.getTime() + dateRange * progress);
     setDateText(formatDate(currentDate));
-
-    const boatCenter = boatLeft + boatW / 2 - sectionRect.left;
     // Each position's zone: on each side, the larger of a fixed minimum and
     // 40% of the distance to the neighbouring position on that side.
     const dotXs = cumulativeMonths.map((m) => boatAndGapWidth + m * spacingPerMonth);
     const offsetOf = (i: number) => boatCenter - dotXs[i];
+
+    // Snap the date when the boat is centred on a dot so the label agrees
+    // with the position even when sub-pixel alignment rounds a month.
+    let nearestIdx: number | null = null;
+    let nearestDist = Infinity;
+    dotXs.forEach((x, i) => {
+      const d = Math.abs(boatCenter - x);
+      if (d < nearestDist) {
+        nearestDist = d;
+        nearestIdx = i;
+      }
+    });
+    if (nearestIdx !== null && nearestDist < 2 * bs) {
+      setDateText(formatDate(orderedPositions[nearestIdx].startDate));
+    }
     const inZone = (i: number) => {
       const d = offsetOf(i);
       const before = Math.max(
@@ -509,7 +526,7 @@ function DesktopTimeline() {
           setActiveIdx(activeRef.current);
           setFocusBoth(1);
         }
-      }, 380);
+      }, 240);
     }
   }, [boatAndGapWidth, spacingPerMonth, totalMonths, cumulativeMonths, boatLeft, boatW, bs, orderedPositions]);
 
@@ -593,10 +610,20 @@ function DesktopTimeline() {
           top: 0,
           width: totalWidth,
           height: svgHeight,
-          transform: `scale(${vizScale})`,
-          transformOrigin: `${vizScrollX + boatLeft}px ${svgHeight}px`,
+          overflow: 'hidden',
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: totalWidth,
+            height: svgHeight,
+            transform: `scale(${vizScale})`,
+            transformOrigin: `${vizScrollX + boatLeft}px ${svgHeight}px`,
+          }}
+        >
       <svg
         width={totalWidth}
         height={svgHeight}
@@ -662,8 +689,8 @@ function DesktopTimeline() {
             <g key={i}>
               <line x1={dotX} y1={c.y} x2={endX} y2={endY} stroke="white" strokeWidth={1} />
               <circle cx={dotX} cy={c.y} r={DOT_SIZE / 2} fill="#0C0D14" stroke="white" strokeWidth={1.5} />
-              <foreignObject x={endX - 112} y={endY + 18} width={LABEL_WIDTH} height={50}>
-                <div {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)} style={{ color: 'white', fontSize: 18, fontFamily: FONT_FAMILY, textAlign: 'center' }}>
+              <foreignObject x={endX - 112} y={endY + 4} width={LABEL_WIDTH} height={44}>
+                <div {...({ xmlns: 'http://www.w3.org/1999/xhtml' } as any)} style={{ color: 'white', fontSize: 18, fontFamily: FONT_FAMILY, textAlign: 'center', lineHeight: 1.2 }}>
                   <div style={{ fontWeight: 700, textDecoration: 'underline'}}>{orderedPositions[i].company}</div>
                   <div>{orderedPositions[i].title}</div>
                 </div>
@@ -672,26 +699,31 @@ function DesktopTimeline() {
           );
         })}
       </svg>
+        </div>
+      </div>
 
       {yearTicks.map((tick) => (
         <div
           key={tick.year}
           style={{
             position: 'absolute',
-            left: tick.x,
-            top: svgHeight + ((yearTop ?? svgHeight - 36) - svgHeight) / vizScale,
+            left:
+              vizScrollX +
+              boatLeft +
+              (tick.x - (vizScrollX + boatLeft)) * vizScale,
+            top: (yearTop ?? svgHeight - 36) - 34 * bs,
             transform: 'translateX(-50%)',
             color: 'white',
             fontSize: 14 * bs,
+            lineHeight: 1.2,
             fontFamily: FONT_FAMILY,
             opacity: 0.85,
+            whiteSpace: 'nowrap',
           }}
         >
           {tick.year}
         </div>
       ))}
-
-      </div>
 
       <div
         className="sticky top-0 left-0 z-20"
@@ -718,7 +750,7 @@ function DesktopTimeline() {
               lineHeight: 1.4,
               pointerEvents: 'none',
               opacity: focus,
-              transition: 'opacity 0.35s ease-out',
+              transition: 'opacity 0.22s ease-out',
             }}
           >
             <div style={{ fontSize: 20 * bs, fontWeight: 700 }}>

@@ -99,16 +99,26 @@ export default function Home() {
     if (window.innerWidth < 768) return;
 
     const horizontalContainer = event.currentTarget;
-    const nextScrollLeft = horizontalContainer.scrollLeft + event.deltaY;
+    const max =
+      horizontalContainer.scrollWidth - horizontalContainer.clientWidth;
+    const nextScrollLeft = Math.max(
+      0,
+      Math.min(max, horizontalContainer.scrollLeft + event.deltaY),
+    );
 
     if (nextScrollLeft !== horizontalContainer.scrollLeft) {
       horizontalContainer.scrollLeft = nextScrollLeft;
+      event.preventDefault();
+    } else if (event.deltaY !== 0) {
+      // At the horizontal ends, hand the wheel back to the page so short
+      // viewports can still reach the footer and the content above it.
+      window.scrollBy(0, event.deltaY);
       event.preventDefault();
     }
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen md:h-screen">
+    <div className="relative flex flex-col w-full min-h-screen">
       <Navbar />
 
       {/* Mobile Only */}
@@ -205,7 +215,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="hidden h-full md:block">
+      <div className="hidden md:block md:h-[calc(100vh-48px)] md:min-h-[640px]">
         <div
           id="home-scroll-desktop"
           className="h-full overflow-x-auto no-scrollbar"
