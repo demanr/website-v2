@@ -218,7 +218,7 @@ export default function Home() {
       <div className="hidden md:block md:h-[calc(100vh-48px)] md:min-h-[640px]">
         <div
           id="home-scroll-desktop"
-          className="h-full overflow-x-auto no-scrollbar"
+          className="h-full overflow-x-auto no-scrollbar overscroll-none"
           onWheel={handleDesktopHorizontalWheel}
         >
           <div className="flex items-start h-full my-auto">

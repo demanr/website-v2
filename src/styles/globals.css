@@ -18,6 +18,11 @@
   }
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background:#0C0D14;
